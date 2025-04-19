@@ -17,8 +17,8 @@ portfolio.display_portfolio_graph()
 portfolio.display_allocations()
 plot_stock_price("AAasdPL", "5y")
 interactive_stock_view("AAPL")
-#for ticker in tickers:
-#    print(f'{ticker}: {calculate_quant_score(ticker)}\n')
+for ticker in tickers:
+    print(f'{ticker}: {calculate_quant_score(ticker)}\n')
 
 for ticker in set(order["ticker"] for order in portfolio.limit_orders):
     portfolio.query_limit_buy_sell(ticker)
