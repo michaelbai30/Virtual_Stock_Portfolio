@@ -7,7 +7,7 @@ def get_stock_data(ticker):
         stock_data = stock.history(period='1d', interval="5m", progress=False)
 
         if stock_data.empty:
-            print(f"[Error] No data found for ticker '{ticker}'.")
+            print(f"No data found for ticker '{ticker}'.")
             return None
 
         stock_data = stock_data[['Close']].copy()
@@ -16,7 +16,7 @@ def get_stock_data(ticker):
         return stock_data.tail(12)
 
     except Exception as e:
-        print(f"[Error] Failed to get stock data for '{ticker}'. Reason: {e}")
+        print(f"Failed to get stock data for '{ticker}'. Reason: {e}")
         return None
 
 def get_price(ticker):
@@ -27,5 +27,5 @@ def get_price(ticker):
             raise ValueError("Price not available.")
         return round(price, 2)
     except Exception as e:
-        print(f"[Error] Failed to retrieve price for '{ticker}'.")
+        print(f"Failed to retrieve price for '{ticker}'.")
         return None

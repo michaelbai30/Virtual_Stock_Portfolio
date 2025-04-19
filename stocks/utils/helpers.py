@@ -9,7 +9,7 @@ def display_tickers_price(tickers):
 def display_current_holdings(ticker, portfolio):
     price = get_price(ticker)
     if price is None:
-        print(f"[Error] '{ticker}' is not a valid ticker or price is unavailable.")
+        print(f"'{ticker}' is not a valid ticker or price is unavailable.")
         return False
 
     print(f"{ticker.upper()} current price = ${price}")
@@ -43,6 +43,8 @@ def handle_sale(portfolio):
         return
     success = display_current_holdings(ticker, portfolio)
     if success == False:
+        return
+    if ticker not in portfolio.holdings or portfolio.holdings[ticker][0] == 0:
         return
     num = input("Enter number of shares to sell (or N to cancel): ")
     if num.lower() == "n":
