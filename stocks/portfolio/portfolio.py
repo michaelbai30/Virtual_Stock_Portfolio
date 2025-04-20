@@ -211,8 +211,6 @@ class Portfolio:
     )
         fig.show()
         
-
-
     def display_allocations(self):
         labels = []
         values = []

@@ -1,7 +1,8 @@
 import yfinance as yf
-import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 import plotly.io as pio
+import pandas as pd
+import datetime
 
 def plot_stock_price(ticker, period):
     period_map = {
@@ -14,6 +15,7 @@ def plot_stock_price(ticker, period):
     }
     if period not in period_map:
         raise ValueError("Invalid Period. Choose from 1d, 1w, 1m, 3m, 1y, 5y")
+    
     yf_period, interval = period_map[period]
     stock = yf.Ticker(ticker)  
     
@@ -27,9 +29,12 @@ def plot_stock_price(ticker, period):
 
 
     stock_data = stock.history(period=yf_period, interval=interval)
+
     if stock_data.empty:
         print(f"No data found for {ticker} with period {period}")
         return
+
+    stock_data.index = stock_data.index.tz_localize(None)
     
     fig = go.Figure(data=[go.Candlestick(
         x=stock_data.index,
@@ -48,56 +53,13 @@ def plot_stock_price(ticker, period):
     )
     fig.show()
 
-def interactive_stock_view(ticker):
-    df = yf.download(ticker, period="6mo", interval="1d")
-    df.reset_index(inplace=True)
 
-    fig = go.Figure()
-
-    # Candlestick trace
-    fig.add_trace(go.Candlestick(
-        x=df['Date'],
-        open=df['Open'],
-        high=df['High'],
-        low=df['Low'],
-        close=df['Close'],
-        name='Candlestick',
-        visible=True  
-    ))
-
-    fig.add_trace(go.Scatter(
-        x=df['Date'],
-        y=df['Close'],
-        mode='lines',
-        name='Line',
-        visible=False  
-    ))
-    fig.update_layout(
-        updatemenus=[
-            dict(
-                type="dropdown",
-                x=0.1,
-                y=1.15,
-                buttons=[
-                    dict(label="Candlestick",
-                         method="update",
-                         args=[{"visible": [True, False]},
-                               {"title": f"{ticker} Candlestick Chart"}]),
-                    dict(label="Line",
-                         method="update",
-                         args=[{"visible": [False, True]},
-                               {"title": f"{ticker} Line Chart"}]),
-                ],
-                direction="down"
-            )
-        ],
-        title=f"{ticker} Candlestick Chart",
-        xaxis_title="Date",
-        yaxis_title="Price",
-        template="plotly_dark",
-        height=600,
-        width=1000
-    )
-
-    fig.show()
-   
+def handle_plot_stock_price():
+    ticker = input("Enter the ticker of the stock you wish to view (or N to cancel): ").upper()
+    if ticker == "N":
+        return
+    period = input("Enter the period of time 1d, 1w, 1m, 3m, 1y, 5y (or N to cancel): ").lower()
+    if period == "N":
+        return
+    plot_stock_price(ticker, period)
+    

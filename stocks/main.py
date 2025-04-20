@@ -15,16 +15,14 @@ portfolio = Portfolio.load_file()
 portfolio.display_portfolio()
 portfolio.display_portfolio_graph()
 portfolio.display_allocations()
-plot_stock_price("AAasdPL", "5y")
-interactive_stock_view("AAPL")
-for ticker in tickers:
-    print(f'{ticker}: {calculate_quant_score(ticker)}\n')
+#for ticker in tickers:
+#    print(f'{ticker}: {calculate_quant_score(ticker)}\n')
 
 for ticker in set(order["ticker"] for order in portfolio.limit_orders):
     portfolio.query_limit_buy_sell(ticker)
 
 while True:
-    action = input("Would you like to Purchase (P), Sell (S), Limit Order (L), or No (N)? ").lower()
+    action = input("Would you like to Purchase (P), Sell (S), Limit Order (L), View Stock (V), or No (N)? ").lower()
 
     if action == "p":
         handle_purchase(portfolio)
@@ -32,6 +30,8 @@ while True:
         handle_sale(portfolio)
     elif action == "l":
         handle_limit_order(portfolio)
+    elif action == "v":
+        handle_plot_stock_price()
     elif action == "n":
         break
     else:
