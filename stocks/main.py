@@ -9,14 +9,10 @@ import logging
 warnings.filterwarnings("ignore")
 logging.getLogger("yfinance").setLevel(logging.CRITICAL)
 
-tickers = ["QQQ", "MRVL", "CRWD", "SPOT", "META", "IBM", "ACHR", "COST", "NKE", "SPY", "AAPL", "TSLA", "NVDA", "AMD", "AMZN", "NFLX", "CRWD", "STEM", "SOFI", "TSM", "MSFT", "GME"]
-
 portfolio = Portfolio.load_file()
 portfolio.display_portfolio()
-portfolio.display_portfolio_graph()
-portfolio.display_allocations()
-#for ticker in tickers:
-#    print(f'{ticker}: {calculate_quant_score(ticker)}\n')
+#portfolio.display_portfolio_graph()
+#portfolio.display_allocations()
 
 for ticker in set(order["ticker"] for order in portfolio.limit_orders):
     portfolio.query_limit_buy_sell(ticker)
@@ -37,4 +33,4 @@ while True:
     else:
         print("Invalid option, please try again.")
 
-portfolio.save_file()  # Save file when the user decides to exit
+portfolio.save_file() 
