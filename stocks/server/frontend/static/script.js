@@ -125,6 +125,31 @@ async function sellStock() {
   loadPortfolio();
 }
 
+async function loadChart(period){
+  const symbol = document.getElementById('chart-symbol').value.toUpperCase();
+  if (!symbol){
+    alert("Please enter a ticker symbol.");
+    return;
+  }
+
+  try{
+    const res = await fetch(`/api/chart?symbol=${symbol}&period=${period}`);
+    const data = await res.json();
+
+    if (data.error) {
+      alert(`Error: ${data.error}`);
+      return;
+    }
+  
+    const img = document.getElementById('chart-frame');
+    img.src = data.image_path + '?t=' + new Date().getTime();
+  }
+  catch(err){
+    alert("Error Loading Chart");
+    console.error(err);
+  }
+}
+
 window.onload = () => {
   loadPortfolio();
   loadSummary();
