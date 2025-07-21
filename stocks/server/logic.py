@@ -89,3 +89,12 @@ def get_price_json(symbol: str):
     if price is None:
         return {"error": "Invalid symbol or price not available."}
     return {"symbol": symbol, "price": price}
+
+def generate_stock_chart(symbol: str, period: str, outpath: str) -> str:
+    # create folder if doesn't exist
+    os.makedirs(os.path.dirname(outpath), exist_ok=True)
+    
+    # generate and save chart
+    plot_stock_price(symbol, period, save_path=outpath)
+
+    return "/static/chart.html"
