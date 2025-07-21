@@ -3,6 +3,7 @@
 # map URLs to functions in logic.py
 # receive data from frontend and returns json
 
+import os
 from flask import Flask, jsonify, request, render_template
 from flask_cors import CORS
 from logic import( 
@@ -12,11 +13,11 @@ from logic import(
     sell_stock,
     add_limit_order,
     run_limit_checks,
-    get_price_json
+    get_price_json,
+    generate_stock_chart
 )
-
 # initialize Flask web server
-app = Flask(__name__, static_folder='frontend/static', template_folder='frontend/templates')
+app = Flask(__name__, static_folder='frontend/static', static_url_path='/static', template_folder='frontend/templates')
 CORS(app) 
 
 @app.route('/')
@@ -58,6 +59,19 @@ def limit_order():
         price=float(data['price']),
         order_type=data['order_type']
     ))
+
+@app.route('/api/chart', methods=['GET'])
+def chart():
+    symbol = request.args.get('symbol')
+    period = request.args.get('period', '1mo') # default to one month
+    outpath = os.path.join(app.static_folder, "chart.html")
+    try:
+        path = generate_stock_chart(symbol, period, outpath)
+        return jsonify({"image_path": path})
+    except Exception as e:
+        return jsonify({"error" : str(e)})
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
