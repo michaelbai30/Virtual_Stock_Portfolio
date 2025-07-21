@@ -31,7 +31,7 @@ def calculate_RSI(prices, period=14):
 
     return rsi
 
-def plot_stock_price(ticker, period):
+def plot_stock_price(ticker, period, save_path=None):
     period_map = {
         '1d': {'plot_period': '1d', 'interval': '5m', 'fetch_period': '5d'},
         '1w': {'plot_period': '7d', 'interval': '30m', 'fetch_period': '10d'},
@@ -131,7 +131,10 @@ def plot_stock_price(ticker, period):
     )
     fig.update_yaxes(title_text="RSI", row=2, col=1, range=[0, 100])
 
-    fig.show()
+    if save_path:
+        fig.write_html(save_path)
+    else:
+        fig.show()
 
 def handle_plot_stock_price():
     ticker = input("Enter the ticker of the stock you wish to view (or N to cancel): ").upper()
