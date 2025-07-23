@@ -41,8 +41,6 @@ async function loadPortfolio() {
 async function loadSummary(){
   const res = await fetch('/api/summary');
   const data = await res.json();
-  console.log("✅ Loaded summary:", data);
-
 
   const summaryText = document.getElementById('summary-data')
   summaryText.innerHTML=`
@@ -177,9 +175,7 @@ async function getLivePrice(){
       result.textContent = "Error fetching data.";
     }
 }
-document.getElementById("lookup-button").addEventListener("click", getLivePrice);
-
-window.onload = () => {
+document.addEventListener("DOMContentLoaded", function () {
   loadPortfolio();
   loadSummary();
-};
+});
