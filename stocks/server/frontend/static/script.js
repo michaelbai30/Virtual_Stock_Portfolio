@@ -150,6 +150,35 @@ async function loadChart(period){
   }
 }
 
+async function getLivePrice(){
+  const ticker = document.getElementById('lookup-ticker').value.trim();
+  const result = document.getElementById('live-price-result');
+
+  if (!ticker){
+    return;
+  }
+
+  try{
+      const res = await fetch(`/api/price/${ticker}`);
+      const data = await res.json();
+
+      if (data.error){
+        result.textContent = "Invalid ticker.";
+        return;
+      }
+
+      result.innerHTML = `
+        <strong>${data.ticker}</strong>: $${data.price} 
+        (${data.change_percent > 0 ? '+' : ''}${data.change_percent}%)`;
+
+    result.style.color = data.change_percent >= 0 ? "green" : "red";
+  } 
+    catch (err) {
+      result.textContent = "Error fetching data.";
+    }
+}
+document.getElementById("lookup-button").addEventListener("click", getLivePrice);
+
 window.onload = () => {
   loadPortfolio();
   loadSummary();
