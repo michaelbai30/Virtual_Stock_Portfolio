@@ -4,6 +4,7 @@
 # receive data from frontend and returns json
 
 import os
+import yfinance as yf
 from flask import Flask, jsonify, request, render_template
 from flask_cors import CORS
 from logic import( 
@@ -71,7 +72,18 @@ def chart():
     except Exception as e:
         return jsonify({"error" : str(e)})
 
-
+@app.route('/api/price/<ticker>', methods=['GET'])
+def get_price(ticker):
+    try:
+        stock = yf.Ticker(ticker)
+        data = stock.info
+        return jsonify({
+            "ticker": ticker.upper(),
+            "price": round(data["regularMarketPrice"], 2),
+            "change_percent": round(data["regularMarketChangePercent"], 2)
+        })
+    except:
+        return jsonify({"error" : "Invalid ticker"})
 
 if __name__ == '__main__':
     app.run(debug=True)
