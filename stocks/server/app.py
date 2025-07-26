@@ -15,7 +15,9 @@ from logic import(
     add_limit_order,
     run_limit_checks,
     get_price_json,
-    generate_stock_chart
+    generate_stock_chart,
+    add_limit_order,
+    run_limit_checks
 )
 # initialize Flask web server
 app = Flask(__name__, static_folder='frontend/static', static_url_path='/static', template_folder='frontend/templates')
@@ -55,7 +57,7 @@ def sell():
 def limit_order():
     data = request.json
     return jsonify(add_limit_order(
-        symbol=data['symbol'],
+        symbol=data['ticker'],
         shares=int(data['shares']),
         price=float(data['price']),
         order_type=data['order_type']
@@ -84,6 +86,29 @@ def get_price(ticker):
         })
     except:
         return jsonify({"error" : "Invalid ticker"})
+
+@app.route('/api/limit-order', methods=['POST'])
+def place_limit_order():
+    data = request.get_json()
+    
+    # extract from expectant json
+    ticker = data.get('ticker')
+    shares = int(data.get('shares', 0))
+    price = float(data.get('price', 0))
+    order_type = data.get('order_type')  # should be either LB, SB, LS, SL
+
+    # condition checking
+    if not ticker or shares <= 0 or price <= 0 or order_type not in ['LB', 'SB', 'LS', 'SL']:
+        return jsonify({"error" : "Invalid Input"})
+
+    res = add_limit_order(ticker, shares, price, order_type)
+
+    return jsonify(res)
+    
+@app.route('/api/check-orders', methods=['GET'])
+def check_orders():
+    run_limit_checks()
+    return jsonify({"message": "Queried for possible limit orders"})
 
 if __name__ == '__main__':
     app.run(debug=True)
