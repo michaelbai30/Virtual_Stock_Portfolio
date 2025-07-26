@@ -177,11 +177,68 @@ async function getLivePrice(){
     }
 }
 
+// function to submit limit and stop orders to backend API
+async function submitLimitOrder(){
+
+  // get user input values from the form fields
+  const ticker = document.getElementById("limit-symbol").value.trim();
+  const shares = parseInt(document.getElementById("limit-shares").value);
+  const price = parseFloat(document.getElementById("limit-price").value);
+  const orderType = document.getElementById("limit-type").value;
+  const result = document.getElementById("limit-order-result");
+
+  // validate inputs
+  if (!ticker || isNaN(shares) || isNaN(price) || shares <= 0 || price <= 0){
+    result.textContent = "Invalid input.";
+    result.style.color = "red";
+    return;
+  }
+
+
+ try {
+    // make a post request to backend with order details
+    const res = await fetch('/api/limit-order', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json' // indicate a json is being sent 
+      },
+      body: JSON.stringify({
+        ticker: ticker,
+        shares: shares,
+        price: price,
+        order_type: orderType // LB, SB, LS or SL
+      })
+    });
+
+    // parse response from backend (res)
+    const data = await res.json();
+
+    if (data.error) {
+      result.textContent = data.error;
+      result.style.color = "red";
+    } else {
+      result.textContent = data.message;
+      result.style.color = "green";
+    }
+  } catch (err) {
+    result.textContent = "Error submitting order.";
+    result.style.color = "red";
+  }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   loadPortfolio();
   loadSummary();
 
-  setInterval(() => { // query for live price every 10 seconds
+  // load 1y AAPL chart by default
+  document.getElementById('chart-symbol').value = 'AAPL';
+  loadChart('1y');
+  
+  // load AAPL live price by defualt
+  document.getElementById('lookup-ticker').value = 'AAPL';
+  getLivePrice();
+
+  setInterval(() => { // query for live price and portfolio changes every 10 seconds
     loadPortfolio();
     loadSummary();
 
