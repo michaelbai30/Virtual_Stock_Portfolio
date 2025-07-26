@@ -43,6 +43,7 @@ async function loadSummary(){
   const data = await res.json();
 
   const summaryText = document.getElementById('summary-data')
+  // PL and Allocations Table construction
   summaryText.innerHTML=`
     <p><strong> Total Value: </strong> $${data.total_value} </p>
      <p><strong> Buying Power: </strong> $${data.cash_balance} </p>
@@ -51,8 +52,8 @@ async function loadSummary(){
           <tr>
             <th> Ticker </th>
             <th> Shares </th>
-            <th> Values </th>
-            <th> Allocation % </th>
+            <th> Value </th>
+            <th> Allocatio n% </th>
             <th> Profit/Loss </th>
             <th> PL % </th>
           </tr>
@@ -164,7 +165,7 @@ async function getLivePrice(){
         result.textContent = "Invalid ticker.";
         return;
       }
-
+      // display ticker, price, change percent, and color based on P/L
       result.innerHTML = `
         <strong>${data.ticker}</strong>: $${data.price} 
         (${data.change_percent > 0 ? '+' : ''}${data.change_percent}%)`;
@@ -175,7 +176,18 @@ async function getLivePrice(){
       result.textContent = "Error fetching data.";
     }
 }
-document.addEventListener("DOMContentLoaded", function () {
+
+document.addEventListener("DOMContentLoaded", () => {
   loadPortfolio();
   loadSummary();
+
+  setInterval(() => { // query for live price every 10 seconds
+    loadPortfolio();
+    loadSummary();
+
+    const ticker = document.getElementById('lookup-ticker').value.trim();
+    if (ticker) {
+      getLivePrice();
+    }
+  }, 10000);
 });
