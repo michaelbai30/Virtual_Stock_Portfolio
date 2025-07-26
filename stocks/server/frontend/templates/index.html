@@ -8,7 +8,6 @@
 
 </head>
 <body>
-
   <section id="stock-chart">
       <h1> Stock Chart </h1>
         <input type="text" id="chart-symbol" placeholder="Enter ticker (ex: AAPL)">
@@ -59,6 +58,23 @@
       <input id="trade-shares" type="number" placeholder="Shares" min="1">
       <button onclick="buyStock()">Buy</button>
       <button onclick="sellStock()">Sell</button>
+  </section>
+
+  <section id="limit-order-form">
+    <h2> PLace Limit/Stop Orders</h2>
+      <input type="text" id="limit-symbol" placeholder="Ticker (ex: AAPL)">
+      <input type="text" id="limit-shares" placeholder="Shares" min="1">
+      <input type="text" id="limit-price" placeholder="Target Price" min="0" step="0.01">
+
+      <select id="limit-type">
+        <option value="LB"> Limit Order </option>
+        <option value="SB"> Stop Order </option>
+        <option value="LS"> Limit Sell </option>
+        <option value="SL"> Stop Loss </option>
+      </select>
+
+      <button onclick="submitLimitOrder()"> Place Order </button>
+      <p id="limit-order-result"></p>
   </section>
 </body>
 </html>
