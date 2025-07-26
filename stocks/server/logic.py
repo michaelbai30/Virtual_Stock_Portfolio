@@ -76,7 +76,15 @@ def sell_stock(symbol: str, shares: int):
 def add_limit_order(symbol: str, shares: int, price: float, order_type: str):
     portfolio.queue_limit_order(symbol, shares, price, order_type)
     portfolio.save_file(portfolio_file)
-    return {"message": f"Queued {shares} shares of {symbol} for {order_type} at ${price}"}
+    if order_type == 'LB':
+        order_type_text = 'Limit Buy'
+    elif order_type == 'SB':
+        order_type_text = 'Stop Buy'
+    elif order_type == 'LS':
+        order_type_text = 'Limit Sell'
+    else:
+        order_type_text = 'Stop Loss'
+    return {"message": f"Queued {shares} shares of {symbol} for {order_type_text} at ${price}"}
 
 def run_limit_checks():
     tickers = set(order["ticker"] for order in portfolio.limit_orders)
@@ -96,5 +104,4 @@ def generate_stock_chart(symbol: str, period: str, outpath: str) -> str:
     
     # generate and save chart
     plot_stock_price(symbol, period, save_path=outpath)
-
     return "/static/chart.html"
