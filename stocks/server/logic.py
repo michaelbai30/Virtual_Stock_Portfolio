@@ -7,9 +7,11 @@ from portfolio.portfolio import Portfolio
 from data.pricing import get_price
 from data.plotting import plot_stock_price
 
+# loads the saveed portfolio from disk
 portfolio_file = "portfolio.txt"
 portfolio = Portfolio.load_file(portfolio_file)
 
+# return current portfolio state in json, from the loaded portfolio file
 def get_portfolio_data():
     return {
         "cash_balance" : portfolio.cash_balance,
@@ -19,12 +21,18 @@ def get_portfolio_data():
         "limit_orders": portfolio.limit_orders
     }
 
+# computes portfolio allocations, PL, and returns a summary of current holdings
 def get_portfolio_summary():
     data = []
+    
+    # extract assets from portfolio
     total_value = portfolio.portfolio_value()
     cash_balance = portfolio.cash_balance
 
+    # loop through each holding
     for ticker, (shares, avg_price) in portfolio.holdings.items():
+
+        # calculate statistics
         cur_price = get_price(ticker)
         cur_val = round(cur_price * shares, 2)
         profit_loss = round((cur_price - avg_price) * shares, 2)
@@ -32,8 +40,8 @@ def get_portfolio_summary():
         allocation_percent = round((cur_val / total_value) * 100, 2) if total_value > 0 else 0
 
         data.append({
-        "ticker":ticker,
-        "shares":shares,
+        "ticker": ticker,
+        "shares": shares,
         "current_value": cur_val,
         "profit_loss" : profit_loss,
         "profit_loss_percent" : profit_loss_percent,
@@ -46,36 +54,39 @@ def get_portfolio_summary():
         "allocations" : data
     }
 
-def buy_stock(symbol: str, shares: int):
-    price = get_price(symbol)
+# buy stock given ticker and num shares
+def buy_stock(ticker: str, shares: int):
+    price = get_price(ticker)
     if price is None:
-        return {"error": f"Ticker {symbol} not found."} # returns an http response body in JSON
+        return {"error": f"Ticker {ticker} not found."} # returns an http response body in JSON
 
     cost = price * shares
     if portfolio.cash_balance < cost:
-        return {"error": f"Insufficient funds to buy {shares} of {symbol}."}
-
-    portfolio.buy_stock(symbol, shares)
+        return {"error": f"Insufficient funds to buy {shares} of {ticker}."}
+    
+    # call functions from /cli_src
+    portfolio.buy_stock(ticker, shares)
     portfolio.save_file(portfolio_file)
-    return {"message": f"Bought {shares} shares of {symbol}", "price": price}
+    return {"message": f"Bought {shares} shares of {ticker}", "price": price}
 
-
-def sell_stock(symbol: str, shares: int):
-    price = get_price(symbol)
+# sell stock
+def sell_stock(ticker: str, shares: int):
+    price = get_price(ticker)
     if price is None:
-        return {"error": f"Ticker {symbol} not found."}
+        return {"error": f"Ticker {ticker} not found."}
 
-    if symbol not in portfolio.holdings or portfolio.holdings[symbol][0] < shares:
-        return {"error": f"Insufficient shares to sell {shares} of {symbol}."}
+    if ticker not in portfolio.holdings or portfolio.holdings[ticker][0] < shares:
+        return {"error": f"Insufficient shares to sell {shares} of {ticker}."}
 
-    portfolio.sell_stock(symbol, shares)
+    portfolio.sell_stock(ticker, shares)
     portfolio.save_file(portfolio_file)
-    return {"message": f"Sold {shares} shares of {symbol}", "price": price}
+    return {"message": f"Sold {shares} shares of {ticker}", "price": price}
 
-
-def add_limit_order(symbol: str, shares: int, price: float, order_type: str):
-    portfolio.queue_limit_order(symbol, shares, price, order_type)
+# use cli_src function to queue limit orders
+def add_limit_order(ticker: str, shares: int, price: float, order_type: str):
+    portfolio.queue_limit_order(ticker, shares, price, order_type) # call fnc
     portfolio.save_file(portfolio_file)
+    # for message purposes
     if order_type == 'LB':
         order_type_text = 'Limit Buy'
     elif order_type == 'SB':
@@ -84,24 +95,26 @@ def add_limit_order(symbol: str, shares: int, price: float, order_type: str):
         order_type_text = 'Limit Sell'
     else:
         order_type_text = 'Stop Loss'
-    return {"message": f"Queued {shares} shares of {symbol} for {order_type_text} at ${price}"}
+    return {"message": f"Queued {shares} shares of {ticker} for {order_type_text} at ${price}"}
 
+# run query_limit_buy_sell on demand for each order 
 def run_limit_checks():
     tickers = set(order["ticker"] for order in portfolio.limit_orders)
     for ticker in tickers:
         portfolio.query_limit_buy_sell(ticker)
     portfolio.save_file(portfolio_file)
 
-def get_price_json(symbol: str):
-    price = get_price(symbol)
+# get price and return as json
+def get_price_json(ticker: str):
+    price = get_price(ticker)
     if price is None:
         return {"error": "Invalid symbol or price not available."}
-    return {"symbol": symbol, "price": price}
+    return {"symbol": ticker, "price": price}
 
 def generate_stock_chart(symbol: str, period: str, outpath: str) -> str:
     # create folder if doesn't exist
     os.makedirs(os.path.dirname(outpath), exist_ok=True)
     
     # generate and save chart
-    plot_stock_price(symbol, period, save_path=outpath)
-    return "/static/chart.html"
+    plot_stock_price(symbol, period, save_path=outpath) # from data.plotting
+    return "/static/chart.html" # return the path of the generated chart
