@@ -1,4 +1,8 @@
+// listens for user actions and calls flask API app.py via fetch
+
+// fetch latest portfolio data from backend and renders cash balance, total portfolio value, current holdings, and recent transactions
 async function loadPortfolio() {
+  // call flask api to get full portfolio as json
   const res = await fetch("http://127.0.0.1:5000/api/portfolio");
   const data = await res.json();
 
@@ -10,10 +14,12 @@ async function loadPortfolio() {
   const holdingsList = document.getElementById("holdings");
   holdingsList.innerHTML = "";
 
+  // check if holdings
   if (Object.keys(data.holdings).length === 0) {
     holdingsList.innerHTML = "<li>No holdings.</li>";
   } 
   else {
+    // ex: {"AAPL" : [shares, avg_price], ...}
     for (const [ticker, [shares, avg_price]] of Object.entries(data.holdings)) {
       const li = document.createElement("li");
       li.textContent = `${ticker}: ${shares} shares @ $${avg_price}`;
@@ -21,14 +27,16 @@ async function loadPortfolio() {
     }
   }
 
-  // transactions
+  // transactions list
   const txList = document.getElementById("transactions");
   txList.innerHTML = "";
 
+  // check if transactions
   if (data.transactions.length === 0) {
     txList.innerHTML = "<li>No transactions yet.</li>";
   } 
   else {
+    // show most recent first
     for (const tx of data.transactions.slice().reverse()) {
       const li = document.createElement("li");
       li.textContent = `${tx.time} - ${tx.type} ${tx.shares} ${tx.ticker} @ $${tx.price}`;
@@ -38,12 +46,19 @@ async function loadPortfolio() {
 }
 
 
+// fetch portfolio summary data from backend and render summary table into summary-data
 async function loadSummary(){
+
+  // get computed summary (value, cash, allocations)
   const res = await fetch('/api/summary');
   const data = await res.json();
 
   const summaryText = document.getElementById('summary-data')
+
   // PL and Allocations Table construction
+  // Total portfolio value
+  // Cash / buying power
+  // Table of each holding
   summaryText.innerHTML=`
     <p><strong> Total Value: </strong> $${data.total_value} </p>
      <p><strong> Buying Power: </strong> $${data.cash_balance} </p>
@@ -74,15 +89,20 @@ async function loadSummary(){
   `;
 }
 
+// submit market order to buy to the backend and refreshes the portfolio view
 async function buyStock() {
+
+  // read user inputs
   const symbol = document.getElementById("trade-symbol").value.toUpperCase();
   const shares = parseInt(document.getElementById("trade-shares").value);
 
+  // validate inputs
   if (!symbol || !shares || shares <= 0) {
     alert("Invalid Entry: Enter valid symbol and share count");
     return;
   }
 
+  // send POST request to flask api with JSON {symbol, shares}
   const res = await fetch("http://127.0.0.1:5000/api/buy", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -90,6 +110,7 @@ async function buyStock() {
   });
 
   const json = await res.json();
+
   if (json.error) {
     alert(json.error);
   } 
@@ -99,15 +120,20 @@ async function buyStock() {
   loadPortfolio();  
 }
 
+// submit market order to sell to the backend and refreshes the portfolio view
 async function sellStock() {
+
+  // read user inputs
   const symbol = document.getElementById("trade-symbol").value.toUpperCase();
   const shares = parseInt(document.getElementById("trade-shares").value);
 
+  // validate inputs
   if (!symbol || !shares || shares <= 0) {
     alert("Invalid Entry: Enter valid symbol and share count");
     return;
   }
-
+  
+  // send POST request to flask api
   const res = await fetch("http://127.0.0.1:5000/api/sell", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -124,14 +150,18 @@ async function sellStock() {
   loadPortfolio();
 }
 
+// send request to generate chart to api
 async function loadChart(period){
   const symbol = document.getElementById('chart-symbol').value.toUpperCase();
+
   if (!symbol){
     alert("Please enter a ticker symbol.");
     return;
   }
 
   try{
+    // request api to generate chart for symbol, period
+    // expected return: {image_path: "/static/chart.html"}
     const res = await fetch(`/api/chart?symbol=${symbol}&period=${period}`);
     const data = await res.json();
 
@@ -149,6 +179,7 @@ async function loadChart(period){
   }
 }
 
+// ask api for live price
 async function getLivePrice(){
   const ticker = document.getElementById('lookup-ticker').value.trim();
   const result = document.getElementById('live-price-result');
@@ -193,14 +224,12 @@ async function submitLimitOrder(){
     result.style.color = "red";
     return;
   }
-
-
  try {
     // make a post request to backend with order details
     const res = await fetch('/api/limit-order', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json' // indicate a json is being sent 
+        'Content-Type': 'application/json' 
       },
       body: JSON.stringify({
         ticker: ticker,
