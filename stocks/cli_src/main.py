@@ -1,4 +1,6 @@
-#TODO handle errors when ticker not present
+# for command line version of the program
+# no longer being worked on
+
 from analysis.indicators import calculate_quant_score
 from data.plotting import *
 from portfolio.portfolio import Portfolio
@@ -11,8 +13,6 @@ logging.getLogger("yfinance").setLevel(logging.CRITICAL)
 
 portfolio = Portfolio.load_file()
 portfolio.display_portfolio()
-#portfolio.display_portfolio_graph()
-#portfolio.display_allocations()
 
 for ticker in set(order["ticker"] for order in portfolio.limit_orders):
     portfolio.query_limit_buy_sell(ticker)
