@@ -23,7 +23,7 @@ class Portfolio:
                 total_shares = self.holdings[ticker][0] + shares
                 new_avg_price = (cost + self.holdings[ticker][0] * self.holdings[ticker][1]) / total_shares
                 self.holdings[ticker] = [total_shares, round(new_avg_price, 2)]
-                self.transactions.append({"type": "BUY", "ticker" : ticker, "shares" : shares, "price" : price_per_share, "time": str(datetime.datetime.now())})
+                self.transactions.append({"type": "BUY", "ticker" : ticker, "shares" : shares, "price" : price_per_share, "time": str(datetime.datetime.now().replace(microsecond=0))})
             else:
                 self.holdings[ticker] = [shares, price_per_share]
             print(f"Bought {shares} shares of {ticker} at ${price_per_share}")
@@ -36,13 +36,13 @@ class Portfolio:
             self.holdings[ticker][0] -= shares
             self.cash_balance += shares * price_per_share
             print(f"Sold {shares} shares of {ticker} at ${get_price(ticker)}")
-            self.transactions.append({"type": "SELL", "ticker" : ticker, "shares" : shares, "price" : price_per_share, "time": str(datetime.datetime.now())})
+            self.transactions.append({"type": "SELL", "ticker" : ticker, "shares" : shares, "price" : price_per_share, "time": str(datetime.datetime.now().replace(microsecond=0))})
         else:
             print("Insufficient shares!")
 
     def queue_limit_order(self, ticker, shares, target_price, order_type):
         order_type = order_type.upper()
-        now = str(datetime.datetime.now())
+        now = str(datetime.datetime.now().replace(microsecond=0))
         cost = target_price * shares
 
         order_map = {
