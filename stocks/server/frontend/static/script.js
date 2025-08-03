@@ -43,6 +43,21 @@ async function loadPortfolio() {
       txList.appendChild(li);
     }
   }
+
+  // limit orders list
+  const limitList = document.getElementById("limit-orders");
+  limitList.innerHTML = "";
+
+  if (data.limit_orders.legth == 0){
+    limitList.innerHTML = "<li> No limit orders yet. <li>";
+  }
+  else{
+    for (const lo of data.limit_orders.slice().reverse()){
+      const li = document.createElement("li");
+      li.textContent = `${lo.time} - ${lo.shares} ${lo.ticker} (${lo.type}) @ $${lo.price}`;
+      limitList.appendChild(li);
+    }
+  }
 }
 
 
@@ -158,7 +173,6 @@ async function loadChart(period){
     alert("Please enter a ticker symbol.");
     return;
   }
-
   try{
     // request api to generate chart for symbol, period
     // expected return: {image_path: "/static/chart.html"}
@@ -187,7 +201,6 @@ async function getLivePrice(){
   if (!ticker){
     return;
   }
-
   try{
       const res = await fetch(`/api/price/${ticker}`);
       const data = await res.json();
