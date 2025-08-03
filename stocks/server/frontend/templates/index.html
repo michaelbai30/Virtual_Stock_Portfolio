@@ -50,6 +50,9 @@
 
     <h2> Transactions</h2>
       <ul id="transactions"></ul>
+    
+    <h2> Pending Limit Orders</h2>
+      <ul id="limit-orders"> </ul>
   </div>
 
   <section>
@@ -61,14 +64,14 @@
   </section>
 
   <section id="limit-order-form">
-    <h2> PLace Limit/Stop Orders</h2>
+    <h2> Place Limit/Stop Orders</h2>
       <input type="text" id="limit-symbol" placeholder="Ticker (ex: AAPL)">
       <input type="text" id="limit-shares" placeholder="Shares" min="1">
       <input type="text" id="limit-price" placeholder="Target Price" min="0" step="0.01">
 
       <select id="limit-type">
-        <option value="LB"> Limit Order </option>
-        <option value="SB"> Stop Order </option>
+        <option value="LB"> Limit Buy </option>
+        <option value="SB"> Stop Buy </option>
         <option value="LS"> Limit Sell </option>
         <option value="SL"> Stop Loss </option>
       </select>
