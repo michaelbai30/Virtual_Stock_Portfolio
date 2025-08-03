@@ -35,7 +35,7 @@ def plot_stock_price(ticker, period, save_path=None):
     period_map = {
         '1d': {'plot_period': '1d', 'interval': '5m', 'fetch_period': '5d'},
         '1w': {'plot_period': '7d', 'interval': '30m', 'fetch_period': '10d'},
-        '1m': {'plot_period': '30D', 'interval': '1d', 'fetch_period': '300d'},
+        '1m': {'plot_period': '30D', 'interval': '4h', 'fetch_period': '300d'},
         '3m': {'plot_period': '90D', 'interval': '1d', 'fetch_period': '400d'},
         '1y': {'plot_period': '365D', 'interval': '1d', 'fetch_period': '2y'},
         '5y': {'plot_period': '1825D', 'interval': '1wk', 'fetch_period': '10y'},
