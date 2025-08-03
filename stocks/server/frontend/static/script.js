@@ -83,7 +83,7 @@ async function loadSummary(){
             <th> Ticker </th>
             <th> Shares </th>
             <th> Value </th>
-            <th> Allocatio n% </th>
+            <th> Allocation% </th>
             <th> Profit/Loss </th>
             <th> PL % </th>
           </tr>
