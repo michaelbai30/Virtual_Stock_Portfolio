@@ -1,9 +1,5 @@
-import pandas as pd
 import json
-import yfinance as yf
-import matplotlib.pyplot as plt
 import datetime
-import numpy as np
 from data.pricing import get_price
 import plotly.graph_objects as go
 
@@ -19,18 +15,21 @@ class Portfolio:
         cost = shares * price_per_share
         if self.cash_balance >= cost:
             self.cash_balance -= cost
+            # append to self.transactions and calculate new average price if holding exists
             if ticker in self.holdings:
                 total_shares = self.holdings[ticker][0] + shares
                 new_avg_price = (cost + self.holdings[ticker][0] * self.holdings[ticker][1]) / total_shares
                 self.holdings[ticker] = [total_shares, round(new_avg_price, 2)]
                 self.transactions.append({"type": "BUY", "ticker" : ticker, "shares" : shares, "price" : price_per_share, "time": str(datetime.datetime.now().replace(microsecond=0))})
             else:
+                # create new holding
                 self.holdings[ticker] = [shares, price_per_share]
             print(f"Bought {shares} shares of {ticker} at ${price_per_share}")
         else:
             print("Insufficient funds!")
 
     def sell_stock(self, ticker, shares):
+        # if enough shares are possessed to sell stock
         if ticker in self.holdings and self.holdings[ticker][0] >= shares:
             price_per_share = get_price(ticker)
             self.holdings[ticker][0] -= shares
@@ -38,7 +37,7 @@ class Portfolio:
             print(f"Sold {shares} shares of {ticker} at ${get_price(ticker)}")
             self.transactions.append({"type": "SELL", "ticker" : ticker, "shares" : shares, "price" : price_per_share, "time": str(datetime.datetime.now().replace(microsecond=0))})
         else:
-            print("Insufficient shares!")
+            print(f"Insufficient shares to sell {shares} {ticker}")
 
     def queue_limit_order(self, ticker, shares, target_price, order_type):
         order_type = order_type.upper()
@@ -142,16 +141,6 @@ class Portfolio:
         else: 
             print("You currently have no holdings.")
             return
-             
-    def high_price_alert(self, ticker, target_price):
-        cur = get_price(ticker)
-        if cur >= target_price:
-            print(f"{ticker} has hit above your target price: ${cur}!")
-    
-    def low_price_alert(self, ticker, target_price):
-        cur = get_price(ticker)
-        if cur <= target_price:
-            print(f"{ticker} has hit below your target price: ${cur}!")
 
     def portfolio_value(self):
         value = self.cash_balance
@@ -159,8 +148,8 @@ class Portfolio:
             for ticker, val in self.holdings.items():
                 value += val[0] * get_price(ticker)
         return value
-        
 
+    # for CLI app only
     def display_portfolio(self):
         print("\nCurrent Portfolio:")
         print(f"Cash Balance: ${self.cash_balance:.2f}")
@@ -175,7 +164,8 @@ class Portfolio:
         else:
             print("You currently have no holdings.")
             return
-
+    
+    # bar graph for CLI app only
     def display_portfolio_graph(self):
         tickers = []
         pl_values = []
@@ -194,7 +184,7 @@ class Portfolio:
             x= tickers,
             y = pl_values,
              hovertext = [f"Profit/Loss: ${round(val, 2)}<br>% Profit/Loss: {round(pct, 2)}%" for val, pct in zip(pl_values, pl_percents)],
-            marker_color=['green' if val>=0 else 'red' for val in pl_values]
+            marker_color=['lightgreen' if val>=0 else 'red' for val in pl_values]
         ))
 
         fig.update_layout(
@@ -210,7 +200,8 @@ class Portfolio:
         height = 600
     )
         fig.show()
-        
+         
+    # pie chart for CLI only
     def display_allocations(self):
         labels = []
         values = []
@@ -243,11 +234,9 @@ class Portfolio:
                 )
             ]
         )
-
         fig.update_layout(
             title = "Portfolio Allocation",
             template = 'plotly_dark'
-
         )
         
         fig.show()
@@ -267,7 +256,6 @@ class Portfolio:
         try:
             with open(filename, 'r', encoding='utf-8') as f:
                 data = json.load(f)
-
                 portfolio = cls(initial_cash = data['cash_balance'])
                 portfolio.cash_balance = data['cash_balance']
                 portfolio.holdings = data['holdings']
@@ -276,4 +264,4 @@ class Portfolio:
                 return portfolio
         except FileNotFoundError:
             print(f"{filename} not found. Creating a new portfolio.")
-            return cls(initial_cash=10000)
+            return cls(initial_cash=10000) # create new portfolio with $10000 starting cash
