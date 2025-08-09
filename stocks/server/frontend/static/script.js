@@ -1,4 +1,4 @@
-// listens for user actions and calls flask API app.py via fetch
+// script.js: listens for user actions and calls flask API app.py via fetch
 
 // fetch latest portfolio data from backend and renders cash balance, total portfolio value, current holdings, and recent transactions
 async function loadPortfolio() {
@@ -10,7 +10,7 @@ async function loadPortfolio() {
   document.getElementById("cash").textContent = `$${data.cash_balance.toFixed(2)}`;
   document.getElementById("value").textContent = `$${data.portfolio_value.toFixed(2)}`;
 
-  // get holdings
+  // HOLDINGS LIST
   const holdingsList = document.getElementById("holdings");
   holdingsList.innerHTML = "";
 
@@ -22,12 +22,12 @@ async function loadPortfolio() {
     // ex: {"AAPL" : [shares, avg_price], ...}
     for (const [ticker, [shares, avg_price]] of Object.entries(data.holdings)) {
       const li = document.createElement("li");
-      li.textContent = `${ticker}: ${shares} shares @ $${avg_price}`;
+      li.innerHTML = `<strong>${ticker}</strong>: ${shares} shares @ $${avg_price}`;
       holdingsList.appendChild(li);
     }
   }
 
-  // transactions list
+  // TRANSACTIONS LIST
   const txList = document.getElementById("transactions");
   txList.innerHTML = "";
 
@@ -44,7 +44,7 @@ async function loadPortfolio() {
     }
   }
 
-  // limit orders list
+  // LIMIT ORDERS LIST
   const limitList = document.getElementById("limit-orders");
   limitList.innerHTML = "";
 
@@ -58,7 +58,8 @@ async function loadPortfolio() {
       limitList.appendChild(li);
     }
   }
-
+  
+  // for <p> in Buy / Sell section
   document.getElementById("stock-info-cash").textContent = `$${data.cash_balance.tofixed(2)}`;
 }
 
@@ -92,12 +93,12 @@ async function loadSummary(){
         <tbody>
           ${data.allocations.map(asset =>`
             <tr>
-              <td>${asset.ticker}</td>
+              <td><strong>${asset.ticker}</strong></td>
               <td>${asset.shares}</td>
               <td>$${asset.current_value}</td>
               <td>${asset.allocation_percent}%</td>
-              <td style="color:${asset.profit_loss >= 0 ? 'green' : 'red'}">$${asset.profit_loss}</td>
-              <td style="color:${asset.profit_loss_percent >= 0 ? 'green' : 'red'}">${asset.profit_loss_percent}%</td>
+              <td style="color:${asset.profit_loss >= 0 ? 'lightgreen' : 'red'}">$${asset.profit_loss}</td>
+              <td style="color:${asset.profit_loss_percent >= 0 ? 'lightgreen' : 'red'}">${asset.profit_loss_percent}%</td>
             </tr>
             `).join('')}
         </tbody>
@@ -107,10 +108,9 @@ async function loadSummary(){
 
 // submit market order to buy to the backend and refreshes the portfolio view
 async function buyStock() {
-
-  // read user inputs
   const symbol = document.getElementById("trade-symbol").value.toUpperCase();
   const shares = parseInt(document.getElementById("trade-shares").value);
+  const result = document.getElementById("purchase-result");
 
   // validate inputs
   if (!symbol || !shares || shares <= 0) {
@@ -122,26 +122,27 @@ async function buyStock() {
   const res = await fetch("http://127.0.0.1:5000/api/buy", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ symbol, shares })
+    body: JSON.stringify({symbol, shares})
   });
 
   const json = await res.json();
 
   if (json.error) {
-    alert(json.error);
+    result.style.color = "red";
+    result.innerHTML = json.error;
   } 
   else {
-    alert(json.message || JSON.stringify(json)); // alert successful purchase
+    result.style.color = "lightgreen"
+    result.innerHTML = json.message
   }
   loadPortfolio();  
 }
 
 // submit market order to sell to the backend and refreshes the portfolio view
 async function sellStock() {
-
-  // read user inputs
   const symbol = document.getElementById("trade-symbol").value.toUpperCase();
   const shares = parseInt(document.getElementById("trade-shares").value);
+  const result = document.getElementById("purchase-result");
 
   // validate inputs
   if (!symbol || !shares || shares <= 0) {
@@ -157,21 +158,25 @@ async function sellStock() {
   });
 
   const json = await res.json();
-  if (json.error) {
-    alert(json.error);
+
+ if (json.error) {
+    result.style.color = "red";
+    result.innerHTML = json.error;
   } 
   else {
-    alert(json.message || JSON.stringify(json));
+    result.style.color = "lightgreen"
+    result.innerHTML = json.message
   }
   loadPortfolio();
 }
 
 // send request to generate chart to api
 async function loadChart(period){
-  const symbol = document.getElementById('chart-symbol').value.toUpperCase();
-
+  const symbol = document.getElementById("chart-symbol").value.toUpperCase();
+  const result = document.getElementById("chart-result");
   if (!symbol){
-    alert("Please enter a ticker symbol.");
+    result.style.color("red");
+    result.textContent = "Please enter a ticker."
     return;
   }
   try{
@@ -181,7 +186,8 @@ async function loadChart(period){
     const data = await res.json();
 
     if (data.error) {
-      alert(`Error: ${data.error}`);
+      result.style.color("red");
+      result.innerHTML = data.error;
       return;
     }
   
@@ -189,7 +195,8 @@ async function loadChart(period){
     img.src = data.image_path + '?t=' + new Date().getTime();
   }
   catch(err){
-    alert("Error Loading Chart");
+    result.style.color("red");
+    result.textContent = "Error loading chart";
     console.error(err);
   }
 }
@@ -207,6 +214,7 @@ async function getLivePrice(){
       const data = await res.json();
 
       if (data.error){
+        result.style.color = "red";
         result.textContent = "Invalid ticker.";
         return;
       }
@@ -218,6 +226,7 @@ async function getLivePrice(){
     result.style.color = data.change_percent >= 0 ? "lightgreen" : "red";
   } 
     catch (err) {
+      result.style.color = "red";
       result.textContent = "Error fetching data.";
     }
 }
@@ -261,7 +270,7 @@ async function submitLimitOrder(){
       result.style.color = "red";
     } else {
       result.textContent = data.message;
-      result.style.color = "green";
+      result.style.color = "lightgreen";
     }
   } catch (err) {
     result.textContent = "Error submitting order.";
@@ -315,7 +324,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById('lookup-ticker').value = 'AAPL';
   getLivePrice();
 
-  setInterval(() => { // query for live price and portfolio changes every 10 seconds
+  setInterval(() => { // query for live price and portfolio changes every 20 seconds
     loadPortfolio();
     loadSummary();
 
@@ -323,5 +332,5 @@ document.addEventListener("DOMContentLoaded", () => {
     if (ticker) {
       getLivePrice();
     }
-  }, 10000);
+  }, 20000);
 });
