@@ -6,6 +6,7 @@ def display_tickers_price(tickers):
     for ticker in tickers:
         print(get_stock_data(ticker))
 
+# for CLI app only
 def display_current_holdings(ticker, portfolio):
     price = get_price(ticker)
     if price is None:
@@ -19,7 +20,7 @@ def display_current_holdings(ticker, portfolio):
     else:
         print(f"You do not currently hold any shares of {ticker.upper()}.")
 
-
+# for CLI app only
 def handle_purchase(portfolio):
     ticker = input("Enter the ticker you wish to purchase (or N to cancel): ").upper()
     if ticker == "N":
@@ -37,6 +38,7 @@ def handle_purchase(portfolio):
         return
     portfolio.buy_stock(ticker, int(num))
 
+# for CLI app only
 def handle_sale(portfolio):
     ticker = input("Enter the ticker you wish to sell (or N to cancel): ").upper()
     if ticker == "N":
@@ -54,6 +56,7 @@ def handle_sale(portfolio):
         return
     portfolio.sell_stock(ticker, int(num))
 
+# for CLI app only
 def handle_limit_order(portfolio):
     ticker = input("Enter the ticker for the limit/stop order (or N to cancel): ").upper()
     if ticker == "N":
