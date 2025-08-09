@@ -84,8 +84,6 @@ def plot_stock_price(ticker, period, save_path=None):
     full_data['RSI'] = rsi_vals
     rsi = full_data.loc[display_data.index, 'RSI']
 
-   
-
     # plot subplot
     fig = make_subplots(
         rows=2, cols=1,
@@ -124,8 +122,8 @@ def plot_stock_price(ticker, period, save_path=None):
         yaxis_title='Price ($)',
         template='plotly_dark',
         hovermode='x unified',
-        width=1400,
-        height=800,
+        width=1000,
+        height=500,
         xaxis_rangeslider_visible=False,
         showlegend=True
     )
