@@ -3,81 +3,125 @@
 <head>
   <meta charset="UTF-8">
   <title> Stock Portfolio</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   <script src="{{ url_for('static', filename='script.js') }}" defer></script>
-
 </head>
 <body>
-  <section id="stock-chart">
-      <h1> Stock Chart </h1>
-        <input type="text" id="chart-symbol" placeholder="Enter ticker (ex: AAPL)">
-          
-          <div id="timeframes">
-            <button onclick="loadChart('1d')"> 1d </button>
-            <button onclick="loadChart('1w')"> 1w </button>
-            <button onclick="loadChart('1m')"> 1m </button>
-            <button onclick="loadChart('3m')"> 3m </button>
-            <button onclick="loadChart('1y')"> 1y </button>
-            <button onclick="loadChart('5y')"> 5y </button>
-          </div>
-
-          <div id="chart-container">
-            <iframe id="chart-frame" style="width: 100%; height: 600px; border: none;"></iframe>
-          </div>
-   </section>
-  
-   <section>
-      <h3> Price Lookup</h3>
-        <input type="text" id="lookup-ticker" placeholder="ex: AAPL">
-        <button onclick="getLivePrice()">Get Price</button>
-        <p id="live-price-result"> </p>
-   </section>
-  <h1> My Portfolio</h1>
-  <button onclick="loadPortfolio()">Refresh</button>
-
-  <div id="portfolio">
-    <h2> Assets </h2>
-      <p><strong>Buying Power:</strong> <span id="cash"></span></p>
-      <p><strong>Portfolio Value:</strong> <span id="value"></span></p>
-
-    <h2> Holdings</h2>
-      <ul id="holdings"></ul>
-
-   <section id="portfolio-summary">
-      <h2>PL and Allocations</h2>
-        <div id="summary-data"></div>
-   </section>
-
-    <h2> Transactions</h2>
-      <ul id="transactions"></ul>
-    
-    <h2> Pending Limit / Stop Orders</h2>
-      <ul id="limit-orders"> </ul>
+  <!-- tab buttons to switch pages -->
+  <div id="tabs">
+    <button type="button" onclick="showTab('tab-stock')">Stock Info</button>
+    <button type="button" onclick="showTab('tab-portfolio')">My Portfolio</button>
   </div>
 
-  <section>
-    <h2> Buy / Sell </h2>
-      <input id="trade-symbol" placeholder="Ticker (ex: AAPL)">
-      <input id="trade-shares" type="number" placeholder="Shares" min="1">
-      <button onclick="buyStock()">Buy</button>
-      <button onclick="sellStock()">Sell</button>
-  </section>
+<!-- Stock Info Section -->
 
-  <section id="limit-order-form">
-    <h2> Place Limit/Stop Orders</h2>
+<!-- stock chart -->
+  <div id="tab-stock">
+    <section id="stock-chart">
+      <h1> Stock Chart </h1>
+      <input type="text" id="chart-symbol" placeholder="Enter ticker (ex: AAPL)">
+      <div id="timeframes">
+        <button onclick="loadChart('1d')"> 1d </button>
+        <button onclick="loadChart('1w')"> 1w </button>
+        <button onclick="loadChart('1m')"> 1m </button>
+        <button onclick="loadChart('3m')"> 3m </button>
+        <button onclick="loadChart('1y')"> 1y </button>
+        <button onclick="loadChart('5y')"> 5y </button>
+      </div>
+      <div id="chart-container">
+        <iframe id="chart-frame" style="width: 100%; height: 600px; border: none;"></iframe>
+      </div>
+    </section>
+
+    <!-- stock info -->
+    <section id="price-lookup">
+      <h3> Price Lookup</h3>
+      <input type="text" id="lookup-ticker" placeholder="ex: AAPL">
+      <button onclick="getLivePrice()">Get Price</button>
+      <div id="price-result"><p id="live-price-result"> </p></div>
+    </section>
+
+    <!-- market order form -->
+    <section>
+      <h2> Buy / Sell </h2>
+       <p><strong>Buying Power:</strong> <span id="stock-info-cash"></span></p>
+      <input id="trade-symbol" type="text" placeholder="Ticker (ex: AAPL)">
+      <input id="trade-shares" type="number" placeholder="Shares" min="1">
+      <button onclick="buyStock(); getLivePrice()">Buy</button>
+      <button onclick="sellStock(); getLivePrice()">Sell</button>
+    </section>
+
+    <!-- limit/stop order form -->
+    <section id="limit-order-form">
+      <h2> Place Limit/Stop Orders</h2>
       <input type="text" id="limit-symbol" placeholder="Ticker (ex: AAPL)">
       <input type="text" id="limit-shares" placeholder="Shares" min="1">
       <input type="text" id="limit-price" placeholder="Target Price" min="0" step="0.01">
-
       <select id="limit-type">
         <option value="LB"> Limit Buy </option>
         <option value="SB"> Stop Buy </option>
         <option value="LS"> Limit Sell </option>
         <option value="SL"> Stop Loss </option>
       </select>
-
       <button onclick="submitLimitOrder()"> Place Order </button>
       <p id="limit-order-result"></p>
-  </section>
+    </section>
+  </div>
+
+  <!-- My Portfolio Section -->
+  <div id="tab-portfolio" hidden>
+    <h1> My Portfolio</h1>
+    <button onclick="loadPortfolio()">Refresh</button>
+
+    <div id="portfolio">
+      <section>
+        <h2> Assets </h2>
+        <p><strong>Buying Power:</strong> <span id="cash"></span></p>
+        <p><strong>Portfolio Value:</strong> <span id="value"></span></p>
+      </section>
+
+      <section>
+        <h2> Holdings</h2>
+        <ul id="holdings"></ul>
+      </section>
+
+      <section id="portfolio-summary">
+        <h2>PL and Allocations</h2>
+        <div id="summary-data"></div>
+      </section>
+      
+      <section>
+        <h2> Transactions</h2>
+        <ul id="transactions"></ul>
+        
+        <h2> Pending Limit / Stop Orders</h2>
+        <ul id="limit-orders"> </ul>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    // switch tabs
+    function showTab(id) {
+      document.getElementById('tab-stock').hidden = true;
+      document.getElementById('tab-portfolio').hidden = true;
+      document.getElementById(id).hidden = false;
+    }
+    // fetch portfolio to display buying power number in stock info tab
+    async function updateStockInfoCash(){
+      try{
+        const res = await fetch("/api/portfolio");
+        const data = await res.json();
+        document.getElementById("stock-info-cash").textContent = `$${data.cash_balance.toFixed(2)}`;
+      } catch(e){
+        document.getElementById("stock-info-cash").textContent = "—";
+      }
+    }
+    // document on load
+    document.addEventListener("DOMContentLoaded", () => {
+      showTab('tab-stock');    
+      updateStockInfoCash();   
+    });
+  </script>
 </body>
 </html>
