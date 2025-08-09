@@ -1,8 +1,8 @@
 # wrap core operations from the cli_src folder 
 import sys
 import os
+import datetime
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../cli_src')))
-
 from portfolio.portfolio import Portfolio
 from data.pricing import get_price
 from data.plotting import plot_stock_price
@@ -118,3 +118,28 @@ def generate_stock_chart(symbol: str, period: str, outpath: str) -> str:
     # generate and save chart
     plot_stock_price(symbol, period, save_path=outpath) # from data.plotting
     return "/static/chart.html" # return the path of the generated chart
+
+# deposit more buying power into account
+def deposit_funds(amount: float):
+    try:
+        amount = float(amount)
+    except (TypeError, ValueError):
+        return {"error": "Invalid Amount"}
+    
+    if amount <= 0:
+        return {"error" : "Amount must be positive."}
+    
+    # update cash balance
+    portfolio.cash_balance += amount
+    try:
+         portfolio.transactions.append({
+            "time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "type": "DEPOSIT",
+            "ticker": "CASH",
+            "shares": round(amount, 2),
+            "price": round(amount, 2)
+        })
+         return {"message": f"Deposited ${round(amount, 2)} successfully to cash balance."}
+    except Exception:
+        pass
+    portfolio.save_file(portfolio_file)
