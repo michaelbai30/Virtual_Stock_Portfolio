@@ -17,14 +17,14 @@ from logic import(
     get_price_json,
     generate_stock_chart,
     add_limit_order,
-    run_limit_checks
+    run_limit_checks,
+    deposit_funds
 )
 # initialize Flask web server
 app = Flask(__name__, static_folder='frontend/static', static_url_path='/static', template_folder='frontend/templates')
 CORS(app) 
 
 # app route decorators define API endpoints (URLS)
-
 @app.route('/')
 def home():
     return render_template('index.html')
@@ -109,6 +109,13 @@ def place_limit_order():
 def check_orders():
     run_limit_checks()
     return jsonify({"message": "Queried for possible limit orders"})
+
+# deposit funds
+@app.route('/api/deposit', methods=['POST'])
+def api_deposit():
+    data = request.get_json()
+    amount = data.get('amount', 0)
+    return jsonify(deposit_funds(amount))
 
 if __name__ == '__main__':
     app.run(debug=True)
