@@ -1,0 +1,83 @@
+body{
+    font-family: 'Segoe UI';
+    background-color: #0F172A;
+    color: white; /*font color*/
+    margin: 0;
+    padding: 20px;
+}
+
+section{
+    background-color:#1E293B;
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+}
+
+button{
+    background-color:#6378ac;
+    padding:5px;
+    margin-bottom: 5px;
+    border-radius: 10px;
+}
+
+button:hover{
+    background-color: #768dc0;
+}
+
+input[type="text"],
+input[type="number"],
+select {
+    background-color: #334155;  
+    color: white;               
+    border: 1px;
+    padding: 6px;
+    border-radius: 6px;
+    margin-bottom:80px;
+}
+
+input:focus,
+select:focus {
+    outline: none; 
+    border-color: lightblue;
+    box-shadow: 0 0 4px lightblue; 
+}
+
+#holdings li,
+#transactions li,
+#limit-orders li { 
+    list-style: none;          
+    background-color: #334155;        
+    padding:5px;        
+    margin-bottom: 4px;                
+    border-radius: 6px;                
+    min-width: 200px;
+}
+
+#portfolio-summary table{
+    width: 50%;
+    margin-top: 20px;
+}
+
+#portfolio-summary thead th{
+    background-color: #1E293B;
+    color:white;
+    padding: 6px;
+    text-align: left;
+}
+#portfolio-summary tbody td {
+    padding: 6px;
+    border-bottom: 1px solid #334155;
+}
+
+#stock-chart #chart-symbol { 
+  margin-bottom: 4px;       
+}
+
+#stock-chart #timeframes {
+  margin-top: 6px;      
+}
+
+#stock-chart { padding-bottom: 10px; }
+
+#stock-chart #chart-symbol { margin-bottom: 4px; }
+#stock-chart #timeframes { margin-top: 4px; }
