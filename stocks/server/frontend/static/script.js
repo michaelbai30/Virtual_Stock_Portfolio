@@ -48,7 +48,7 @@ async function loadPortfolio() {
   const limitList = document.getElementById("limit-orders");
   limitList.innerHTML = "";
 
-  if (data.limit_orders.legth == 0){
+  if (data.limit_orders.length == 0){
     limitList.innerHTML = "<li> No limit orders yet. <li>";
   }
   else{
@@ -58,8 +58,9 @@ async function loadPortfolio() {
       limitList.appendChild(li);
     }
   }
-}
 
+  document.getElementById("stock-info-cash").textContent = `$${data.cash_balance.tofixed(2)}`;
+}
 
 // fetch portfolio summary data from backend and render summary table into summary-data
 async function loadSummary(){
@@ -263,6 +264,40 @@ async function submitLimitOrder(){
       result.style.color = "green";
     }
   } catch (err) {
+    result.textContent = "Error submitting order.";
+    result.style.color = "red";
+  }
+}
+
+// function to send request to /api/deposit to deposit funds
+async function depositFunds(){
+  const input = document.getElementById('deposit-amount')
+  const message = document.getElementById('deposit-message')
+  const amount = parseFloat(input.value)
+
+  try{
+    const result = await fetch('/api/deposit',{
+      method: 'POST',
+       headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({amount})
+    })
+
+    const data = await result.json();
+
+    if (data.error){
+      message.style.color = 'red';
+      message.textContent = data.error;
+      return;
+    }
+
+    message.style.color = 'lightgreen';
+    message.textContent = data.message;
+    input.value='';
+
+  }
+  catch(err){
     result.textContent = "Error submitting order.";
     result.style.color = "red";
   }
