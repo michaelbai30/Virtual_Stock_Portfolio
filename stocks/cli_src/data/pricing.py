@@ -1,6 +1,7 @@
 import yfinance as yf
 import pandas as pd
 
+# get stock data price yfinance
 def get_stock_data(ticker):
     try:
         stock = yf.Ticker(ticker)

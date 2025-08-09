@@ -2,8 +2,6 @@ import yfinance as yf
 import plotly.graph_objects as go
 import plotly.io as pio
 from plotly.subplots import make_subplots
-import pandas as pd
-import datetime
 
 def calculate_RSI(prices, period=14):
     if len(prices) < period + 1:
@@ -122,8 +120,8 @@ def plot_stock_price(ticker, period, save_path=None):
         yaxis_title='Price ($)',
         template='plotly_dark',
         hovermode='x unified',
-        width=1000,
-        height=500,
+        width=1100,
+        height=550,
         xaxis_rangeslider_visible=False,
         showlegend=True
     )
@@ -134,6 +132,7 @@ def plot_stock_price(ticker, period, save_path=None):
     else:
         fig.show()
 
+# for CLI application only
 def handle_plot_stock_price():
     ticker = input("Enter the ticker of the stock you wish to view (or N to cancel): ").upper()
     if ticker == "N":
