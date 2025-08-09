@@ -214,7 +214,7 @@ async function getLivePrice(){
         <strong>${data.ticker}</strong>: $${data.price} 
         (${data.change_percent > 0 ? '+' : ''}${data.change_percent}%)`;
 
-    result.style.color = data.change_percent >= 0 ? "green" : "red";
+    result.style.color = data.change_percent >= 0 ? "lightgreen" : "red";
   } 
     catch (err) {
       result.textContent = "Error fetching data.";
