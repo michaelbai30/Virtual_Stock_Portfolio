@@ -31,11 +31,12 @@
       <div id="chart-container">
         <iframe id="chart-frame" style="width: 100%; height: 600px; border: none;"></iframe>
       </div>
+      <p id="chart-result"></p>
     </section>
 
     <!-- stock info -->
     <section id="price-lookup">
-      <h3> Price Lookup</h3>
+      <h2> Price Lookup</h2>
       <input type="text" id="lookup-ticker" placeholder="ex: AAPL">
       <button onclick="getLivePrice()">Get Price</button>
       <div id="price-result"><p id="live-price-result"> </p></div>
@@ -49,6 +50,7 @@
       <input id="trade-shares" type="number" placeholder="Shares" min="1">
       <button onclick="buyStock(); getLivePrice()">Buy</button>
       <button onclick="sellStock(); getLivePrice()">Sell</button>
+      <p id="purchase-result"> </p>
     </section>
 
     <!-- limit/stop order form -->
@@ -72,7 +74,7 @@
   <div id="tab-portfolio" hidden>
     <h1> My Portfolio</h1>
 
-    <input id="deposit-amount" type="number" placeholder="Amount" min="1" step="0.01">
+    <input id="deposit-amount" type="number" placeholder="Amount" min="0.01" step=0.01>
     <button onclick="depositFunds()">Deposit</button>
      <p id="deposit-message"></p>
     <div><button onclick="loadPortfolio()">Refresh</button></div>
@@ -80,8 +82,8 @@
     <div id="portfolio">
       <section>
         <h2> Assets </h2>
-        <p><strong>Buying Power:</strong> <span id="cash"></span></p>
         <p><strong>Portfolio Value:</strong> <span id="value"></span></p>
+        <p><strong>Buying Power:</strong> <span id="cash"></span></p>
       </section>
 
       <section>
