@@ -1,7 +1,5 @@
 # for command line version of the program
 # no longer being worked on
-
-from analysis.indicators import calculate_quant_score
 from data.plotting import *
 from portfolio.portfolio import Portfolio
 from data.pricing import get_price
