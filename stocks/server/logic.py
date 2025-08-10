@@ -67,7 +67,7 @@ def buy_stock(ticker: str, shares: int):
     # call functions from /cli_src
     portfolio.buy_stock(ticker, shares)
     portfolio.save_file(portfolio_file)
-    return {"message": f"Bought {shares} shares of {ticker}", "price": price}
+    return {"message": f"Bought {shares} shares of {ticker} at price ${price}", "price": price}
 
 # sell stock
 def sell_stock(ticker: str, shares: int):
@@ -80,7 +80,7 @@ def sell_stock(ticker: str, shares: int):
 
     portfolio.sell_stock(ticker, shares)
     portfolio.save_file(portfolio_file)
-    return {"message": f"Sold {shares} shares of {ticker}", "price": price}
+    return {"message": f"Sold {shares} shares of {ticker} at price ${price}", "price": price}
 
 # use cli_src function to queue limit orders
 def add_limit_order(ticker: str, shares: int, price: float, order_type: str):
@@ -143,3 +143,15 @@ def deposit_funds(amount: float):
     except Exception:
         pass
     portfolio.save_file(portfolio_file)
+
+def format_transactions_text() -> str:
+    lines = []
+
+    for tx in portfolio.transactions:
+        t = tx.get("time", "")
+        typ = tx.get("type", "")
+        sh = tx.get("shares", 0)
+        tk = tx.get("ticker", "")
+        pr = tx.get("price", 0)
+        lines.append(f"{t} - {typ} {sh} {tk} @ ${pr}")
+    return "\n".join(lines)
