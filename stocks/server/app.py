@@ -5,7 +5,7 @@
 
 import os
 import yfinance as yf
-from flask import Flask, jsonify, request, render_template
+from flask import Flask, jsonify, request, render_template, Response
 from flask_cors import CORS
 from logic import( 
     get_portfolio_data,
@@ -18,7 +18,8 @@ from logic import(
     generate_stock_chart,
     add_limit_order,
     run_limit_checks,
-    deposit_funds
+    deposit_funds,
+    format_transactions_text
 )
 # initialize Flask web server
 app = Flask(__name__, static_folder='frontend/static', static_url_path='/static', template_folder='frontend/templates')
@@ -116,6 +117,14 @@ def api_deposit():
     data = request.get_json()
     amount = data.get('amount', 0)
     return jsonify(deposit_funds(amount))
+
+@app.route('/api/transactions.txt', methods=['GET'])
+def download_transactions_txt():
+    text = format_transactions_text()
+    return Response(
+        text,
+        headers={'Content-Disposition': 'attachment; filename=transactions.txt'} # download as a txt file attachment
+    )
 
 if __name__ == '__main__':
     app.run(debug=True)
