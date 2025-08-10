@@ -9,6 +9,7 @@ from data.plotting import plot_stock_price
 
 # loads the saveed portfolio from disk
 portfolio_file = "portfolio.txt"
+watchlist_file = "watchlist.txt"
 portfolio = Portfolio.load_file(portfolio_file)
 
 # return current portfolio state in json, from the loaded portfolio file
@@ -144,9 +145,9 @@ def deposit_funds(amount: float):
         pass
     portfolio.save_file(portfolio_file)
 
+# create transactions.txt file from portfolio.transactions
 def format_transactions_text() -> str:
     lines = []
-
     for tx in portfolio.transactions:
         t = tx.get("time", "")
         typ = tx.get("type", "")
@@ -155,3 +156,41 @@ def format_transactions_text() -> str:
         pr = tx.get("price", 0)
         lines.append(f"{t} - {typ} {sh} {tk} @ ${pr}")
     return "\n".join(lines)
+
+# WATCHLIST LOGIC
+def load_watchlist() -> list:
+    if os.path.exists(watchlist_file):
+        with open(watchlist_file, "r") as fp:
+            return sorted({ticker.strip().upper() for ticker in fp if ticker.strip()}) # return sorted list of tickers in the watchlist. 
+    return []
+
+def save_watchlist(tickers: list):
+    with open(watchlist_file, "w") as fp:
+        fp.write("\n".join(sorted({ticker.upper() for ticker in tickers})))
+
+watchlist = load_watchlist()
+
+def get_watchlist() -> dict[str, list[str]]:
+    return {"tickers": watchlist}
+
+def add_to_watchlist(ticker: str) -> dict[str, object]:
+    if not ticker or not isinstance(ticker, str):
+        return {"error": "Invalid ticker.", "tickers": watchlist}
+    new_t = ticker.strip().upper()
+    if not new_t:
+        return {"error": "Invalid ticker.", "tickers": watchlist}
+    if new_t in watchlist:
+        return {"message": f"{new_t} already in watchlist.", "tickers": watchlist}
+    watchlist.append(new_t)
+    save_watchlist(watchlist)
+    return {"message": f"Added {new_t} to watchlist.", "tickers": watchlist}
+
+def remove_from_watchlist(ticker: str):
+    if not ticker or not isinstance(ticker, str):
+        return {"error": "Invalid ticker.", "tickers": watchlist}
+    new_t = ticker.strip().upper()
+    if new_t in watchlist:
+        watchlist.remove(new_t)
+        save_watchlist(watchlist)
+        return {"message": f"Removed {new_t} from watchlist.", "tickers": watchlist}
+    return {"error": f"{new_t} not in watchlist.", "tickers": watchlist}
