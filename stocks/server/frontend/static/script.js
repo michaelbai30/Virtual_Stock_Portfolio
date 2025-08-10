@@ -37,7 +37,7 @@ async function loadPortfolio() {
   } 
   else {
     // show most recent first
-    for (const tx of data.transactions.slice().reverse()) {
+    for (const tx of data.transactions.slice(-20).reverse()) {
       const li = document.createElement("li");
       li.textContent = `${tx.time} - ${tx.type} ${tx.shares} ${tx.ticker} @ $${tx.price}`;
       txList.appendChild(li);
