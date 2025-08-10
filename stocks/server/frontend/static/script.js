@@ -60,7 +60,7 @@ async function loadPortfolio() {
   }
   
   // for <p> in Buy / Sell section
-  document.getElementById("stock-info-cash").textContent = `$${data.cash_balance.tofixed(2)}`;
+  document.getElementById("stock-info-cash").textContent = `$${data.cash_balance.toFixed(2)}`;
 }
 
 // fetch portfolio summary data from backend and render summary table into summary-data
@@ -175,7 +175,7 @@ async function loadChart(period){
   const symbol = document.getElementById("chart-symbol").value.toUpperCase();
   const result = document.getElementById("chart-result");
   if (!symbol){
-    result.style.color("red");
+    result.style.color = "red";
     result.textContent = "Please enter a ticker."
     return;
   }
@@ -186,7 +186,7 @@ async function loadChart(period){
     const data = await res.json();
 
     if (data.error) {
-      result.style.color("red");
+      result.style.color = "red";
       result.innerHTML = data.error;
       return;
     }
@@ -195,7 +195,7 @@ async function loadChart(period){
     img.src = data.image_path + '?t=' + new Date().getTime();
   }
   catch(err){
-    result.style.color("red");
+    result.style.color = "red";
     result.textContent = "Error loading chart";
     console.error(err);
   }
@@ -307,14 +307,90 @@ async function depositFunds(){
 
   }
   catch(err){
-    result.textContent = "Error submitting order.";
-    result.style.color = "red";
+    message.textContent = "Error submitting order.";
+    message.style.color = "red";
   }
+}
+
+// WATCHLIST
+async function getWatchlist(){
+  const res = await fetch('/api/watchlist');
+  return await res.json(); // expects { tickers: [...] }
+}
+
+async function addToWatchlist(){
+  const watchlist_input = document.getElementById('watchlist-input');
+  const ticker = (watchlist_input.value).trim().toUpperCase();
+  if (!ticker) return;
+
+  try{
+    await fetch('/api/watchlist', {
+      method: 'POST',
+      headers: {'Content-Type' : 'application/json'},
+      body: JSON.stringify({ symbol: ticker })
+    });
+    watchlist_input.value = ''; // reset text box
+    renderWatchlist();
+  } catch (exception){
+    console.error(exception);
+  }
+}
+
+async function removeFromWatchlist(ticker) {
+  try {
+    await fetch(`/api/watchlist/${encodeURIComponent(ticker)}`, { method: 'DELETE' });
+    renderWatchlist();
+  } catch (exception) {
+    console.error(exception);
+  }
+}
+
+async function renderWatchlist(){
+  const list = document.getElementById('watchlist-list');
+  if (!list) return;
+
+  try{
+    const { tickers = [] } = await getWatchlist(); // ex: ['AAPL', 'AMD']
+    if (!tickers.length){
+      list.innerHTML = '<li>No tickers yet.</li>';
+      return;
+    }
+
+    const rows = await Promise.all(tickers.map(async (ticker) => {
+      try{
+        const row = await fetch(`/api/price/${ticker}`);
+        const data = await row.json();
+        if (data.error) throw new Error(data.error);
+        // lightgreen if percent change is >=0, red else
+        const color = Number(data.change_percent) >= 0 ? 'lightgreen' : 'red';
+        return `
+          <li data-ticker="${ticker}">
+            <strong>${data.ticker}</strong>: $${data.price}
+            <span style="color:${color}">(${data.change_percent}%)</span>
+            <button onclick="removeFromWatchlist('${ticker}')">Remove</button>
+          </li>`;
+      }
+      catch {
+        return `
+          <li data-ticker="${ticker}">
+            <strong>${ticker}</strong>
+            <button onclick="removeFromWatchlist('${ticker}')">Remove</button>
+          </li>`;
+      }
+    }));
+    list.innerHTML = rows.filter(Boolean).join('');
+  } 
+    catch (exception) {
+      console.error(exception);
+      list.style.color = "red";
+      list.innerHTML = '<li>Error loading watchlist.</li>';
+    }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
   loadPortfolio();
   loadSummary();
+  renderWatchlist();
 
   // load 1y AAPL chart by default
   document.getElementById('chart-symbol').value = 'AAPL';
@@ -324,13 +400,13 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById('lookup-ticker').value = 'AAPL';
   getLivePrice();
 
-  setInterval(() => { // query for live price and portfolio changes every 20 seconds
+  setInterval(() => { // query for live prices and portfolio changes every 10 seconds
     loadPortfolio();
     loadSummary();
-
+    renderWatchlist();
     const ticker = document.getElementById('lookup-ticker').value.trim();
     if (ticker) {
       getLivePrice();
     }
-  }, 20000);
+  }, 10000);
 });
