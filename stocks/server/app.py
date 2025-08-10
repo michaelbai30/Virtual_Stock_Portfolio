@@ -19,7 +19,10 @@ from logic import(
     add_limit_order,
     run_limit_checks,
     deposit_funds,
-    format_transactions_text
+    format_transactions_text,
+    get_watchlist,
+    add_to_watchlist,
+    remove_from_watchlist
 )
 # initialize Flask web server
 app = Flask(__name__, static_folder='frontend/static', static_url_path='/static', template_folder='frontend/templates')
@@ -118,6 +121,7 @@ def api_deposit():
     amount = data.get('amount', 0)
     return jsonify(deposit_funds(amount))
 
+# endpoint to download transactions.txt
 @app.route('/api/transactions.txt', methods=['GET'])
 def download_transactions_txt():
     text = format_transactions_text()
@@ -125,6 +129,21 @@ def download_transactions_txt():
         text,
         headers={'Content-Disposition': 'attachment; filename=transactions.txt'} # download as a txt file attachment
     )
+
+# WATCHLIST APIS
+@app.route('/api/watchlist', methods=['GET'])
+def api_get_watchlist():
+    return jsonify(get_watchlist())
+
+@app.route('/api/watchlist', methods=['POST'])
+def api_add_to_watchlist():
+    data = request.get_json()
+    symbol = data.get('symbol')
+    return jsonify(add_to_watchlist(symbol))
+
+@app.route('/api/watchlist/<symbol>', methods=['DELETE'])
+def api_remove_from_watchlist(symbol):
+    return jsonify(remove_from_watchlist(symbol))
 
 if __name__ == '__main__':
     app.run(debug=True)
