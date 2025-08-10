@@ -14,9 +14,9 @@
   </div>
 
 <!-- Stock Info Section -->
-
 <!-- stock chart -->
   <div id="tab-stock">
+    <h1> Stock Info </h1>
     <section id="stock-chart">
       <h1> Stock Chart </h1>
       <input type="text" id="chart-symbol" placeholder="Enter ticker (ex: AAPL)">
@@ -34,13 +34,21 @@
       <p id="chart-result"></p>
     </section>
 
-    <!-- stock info -->
+    <!-- stock price -->
     <section id="price-lookup">
       <h2> Price Lookup</h2>
       <input type="text" id="lookup-ticker" placeholder="ex: AAPL">
       <button onclick="getLivePrice()">Get Price</button>
       <div id="price-result"><p id="live-price-result"> </p></div>
     </section>
+
+    <!-- watchlist -->
+     <section id="watchlist-section">
+      <h2> Watchlist </h2>
+      <input id="watchlist-input" type="text" placeholder="Ticker (ex: AAPL)">
+      <button onclick="addToWatchlist()"> Add </button>
+      <ul id="watchlist-list" style="list-style-type:none; padding-left:0;"></ul>
+     </section>
 
     <!-- market order form -->
     <section>
@@ -73,12 +81,13 @@
   <!-- My Portfolio Section -->
   <div id="tab-portfolio" hidden>
     <h1> My Portfolio</h1>
-
-    <input id="deposit-amount" type="number" placeholder="Amount" min="0.01" step=0.01>
-    <button onclick="depositFunds()">Deposit</button>
-     <p id="deposit-message"></p>
-    <div><button onclick="loadPortfolio()">Refresh</button></div>
-    
+    <div><button onclick="loadPortfolio()">Refresh Portfolio</button></div>
+    <section>
+      <h2> Deposit Funds </h2>
+      <input id="deposit-amount" type="number" placeholder="Amount" min="0.01" step=0.01>
+      <button onclick="depositFunds()">Deposit</button>
+      <p id="deposit-message"></p>
+    </section> 
     <div id="portfolio">
       <section>
         <h2> Assets </h2>
