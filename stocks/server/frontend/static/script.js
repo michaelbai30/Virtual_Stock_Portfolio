@@ -79,6 +79,9 @@ async function loadSummary(){
   summaryText.innerHTML=`
     <p><strong> Total Value: </strong> $${data.total_value} </p>
      <p><strong> Buying Power: </strong> $${data.cash_balance} </p>
+     <p> <strong> Total P/L: </strong> <span style="color:${data.total_profit_loss >= 0 ? 'lightgreen' : 'red'}">
+     $${data.total_profit_loss} (${data.total_profit_loss_percent}%)<span> </p>
+     
      <table>
         <thead>
           <tr>
