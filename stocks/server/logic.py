@@ -30,6 +30,9 @@ def get_portfolio_summary():
     total_value = portfolio.portfolio_value()
     cash_balance = portfolio.cash_balance
 
+    total_pl = 0
+    total_invested = 0
+
     # loop through each holding
     for ticker, (shares, avg_price) in portfolio.holdings.items():
 
@@ -39,6 +42,13 @@ def get_portfolio_summary():
         profit_loss = round((cur_price - avg_price) * shares, 2)
         profit_loss_percent = round ((profit_loss / (avg_price * shares)) * 100, 2) if avg_price > 0 else 0
         allocation_percent = round((cur_val / total_value) * 100, 2) if total_value > 0 else 0
+
+        total_pl += profit_loss
+        total_invested += avg_price * shares
+        if total_invested > 0:
+            total_pl_percent = round((total_pl / total_invested) * 100, 2)
+        else:
+            total_pl_percent = 0
 
         data.append({
         "ticker": ticker,
@@ -52,7 +62,9 @@ def get_portfolio_summary():
     return {
         "total_value" : round(total_value, 2),
         "cash_balance" : round(cash_balance, 2),
-        "allocations" : data
+        "allocations" : data,
+        "total_profit_loss": round(total_pl, 2),
+        "total_profit_loss_percent": total_pl_percent
     }
 
 # buy stock given ticker and num shares
