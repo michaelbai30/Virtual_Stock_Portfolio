@@ -173,8 +173,25 @@ async function sellStock() {
   loadPortfolio();
 }
 
+// globals
+let chartTimer = null;
+let chartPeriod = null;
+
+// define period (time) until refresh
+function chartRefreshMs(period) {
+  switch (period) {
+    case '1d':  return 5 * 60_000; // 5 min
+    case '1w':  return 30 * 60_000; // 30 min
+    case '1m':  return 240 * 60_000; // 4 hrs
+    case '3m':  return 1440 * 60_000; // 1 day
+    case '1y':  return 1440 * 60_000; // 1 day
+    case '5y':  return 1440 * 60_000 // 1 day
+    default:    return 5 * 60_000; // 5 mins
+  }
+}
+
 // send request to generate chart to api
-async function loadChart(period){
+async function loadChartOnce(){
   const symbol = document.getElementById("chart-symbol").value.toUpperCase();
   const result = document.getElementById("chart-result");
   if (!symbol){
@@ -185,7 +202,7 @@ async function loadChart(period){
   try{
     // request api to generate chart for symbol, period
     // expected return: {image_path: "/static/chart.html"}
-    const res = await fetch(`/api/chart?symbol=${symbol}&period=${period}`);
+    const res = await fetch(`/api/chart?symbol=${symbol}&period=${chartPeriod}`);
     const data = await res.json();
 
     if (data.error) {
@@ -202,6 +219,17 @@ async function loadChart(period){
     result.textContent = "Error loading chart";
     console.error(err);
   }
+}
+
+function startChartRefresh(){
+  clearInterval(chartTimer);
+  chartTimer = setInterval(loadChartOnce, chartRefreshMs(chartPeriod)) // recall loadChartOnce every chartPeriod MS
+}
+
+async function loadChart(period){
+  chartPeriod = period;
+  await loadChartOnce(); // load chart initially
+  startChartRefresh();
 }
 
 // ask api for live price
@@ -403,7 +431,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById('lookup-ticker').value = 'AAPL';
   getLivePrice();
 
-  setInterval(() => { // query for live prices and portfolio changes every 10 seconds
+  setInterval(() => { // query for live prices and portfolio changes every 15 seconds
     loadPortfolio();
     loadSummary();
     renderWatchlist();
@@ -411,5 +439,5 @@ document.addEventListener("DOMContentLoaded", () => {
     if (ticker) {
       getLivePrice();
     }
-  }, 10000);
+  }, 15000);
 });
