@@ -12,6 +12,12 @@ portfolio_file = "portfolio.txt"
 watchlist_file = "watchlist.txt"
 portfolio = Portfolio.load_file(portfolio_file)
 
+def reload_portfolio():
+    """Reload portfolio from disk into memory after an upload."""
+    global portfolio
+    portfolio = Portfolio.load_file(portfolio_file)
+    return portfolio
+
 # return current portfolio state in json, from the loaded portfolio file
 def get_portfolio_data():
     return {
@@ -180,10 +186,17 @@ def save_watchlist(tickers: list):
     with open(watchlist_file, "w") as fp:
         fp.write("\n".join(sorted({ticker.upper() for ticker in tickers})))
 
+def reload_watchlist():
+    """Reload watchlist from disk into memory and return it."""
+    global watchlist
+    watchlist = load_watchlist()
+    return watchlist
+
 watchlist = load_watchlist()
 
 def get_watchlist() -> dict[str, list[str]]:
-    return {"tickers": watchlist}
+    # always read from disk so uploads show up immediately
+    return {"tickers": reload_watchlist()}
 
 def add_to_watchlist(ticker: str) -> dict[str, object]:
     if not ticker or not isinstance(ticker, str):
@@ -206,3 +219,4 @@ def remove_from_watchlist(ticker: str):
         save_watchlist(watchlist)
         return {"message": f"Removed {new_t} from watchlist.", "tickers": watchlist}
     return {"error": f"{new_t} not in watchlist.", "tickers": watchlist}
+
