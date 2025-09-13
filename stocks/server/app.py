@@ -4,7 +4,10 @@
 # receive data from frontend and returns json
 
 import os
+import json
 import yfinance as yf
+import re
+from werkzeug.utils import secure_filename
 from flask import Flask, jsonify, request, render_template, Response
 from flask_cors import CORS
 from logic import( 
@@ -22,7 +25,10 @@ from logic import(
     format_transactions_text,
     get_watchlist,
     add_to_watchlist,
-    remove_from_watchlist
+    remove_from_watchlist,
+    reload_portfolio,
+    portfolio_file,
+    watchlist_file
 )
 # initialize Flask web server
 app = Flask(__name__, static_folder='frontend/static', static_url_path='/static', template_folder='frontend/templates')
@@ -144,6 +150,212 @@ def api_add_to_watchlist():
 @app.route('/api/watchlist/<symbol>', methods=['DELETE'])
 def api_remove_from_watchlist(symbol):
     return jsonify(remove_from_watchlist(symbol))
+
+
+# DOWNLOAD RAW FILES
+@app.route('/api/portfolio.txt', method=['GET'])
+def download_portfolio_txt():
+    try:
+        with open(portfolio_file, "r") as fp:
+            content = fp.read() # return raw
+    except FileNotFoundError:
+        content = '{"holdings": {}, "cash_balance": 0, "transactions": [], "limit_orders": []}'
+
+    return Response(
+        content,
+        mimetype="text/plain",
+        headers={"Content-Disposition": "attachment; filename=portfolio.txt"}
+    )
+
+@app.route('/api/watchlist.txt', method=['GET'])
+def download_watchlist_txt():
+    try:
+        with open(watchlist_file, "r") as fp:
+            content = fp.read()
+    except FileNotFoundError:
+        content = "[]"
+    return Response(
+        content,
+        mimetype="text/plain",
+        headers={"Content-Disposition": "attachment; filename=watchlist.txt"}
+    )
+
+# UPLOAD AND VALIDATE FILES
+TICKER_RE = re.compile(r'^[A-Z][A-Z0-9.\-]{0,9}$') # < 10 chars max, letters, digits, ., -, must start with a letter.
+def _is_number(n): return isinstance(n, (int, float)) and not isinstance(n, bool)
+
+@app.route('/api/portfolio/upload', method=['POST'])
+def upload_portfolio_txt():
+    # basic file checks
+    if "file" not in request.files:
+        return jsonify(ok=False, error="No file in request."), 400
+    fp = request.files["file"]
+    if not fp or fp.filename == "":
+        return jsonify(ok=False, error="No file selected."), 400
+
+    # filename is exactly 'portfolio.txt'
+    fname = secure_filename(fp.filename)
+    if fname != "portfolio.txt":
+        return jsonify(ok=False, error="File must be named 'portfolio.txt'."), 400
+
+    # check file is in UTF-8 format
+    try:
+        text = fp.read().decode("utf-8-sig", errors="strict")
+    except UnicodeDecodeError:
+        return jsonify(ok=False, error="File must be UTF-8 text."), 400
+
+    # must be JSON object
+    try:
+        obj = json.loads(text)
+    except Exception:
+        return jsonify(ok=False, error="Portfolio must be valid JSON."), 400
+    if not isinstance(obj, dict):
+        return jsonify(ok=False, error="Portfolio JSON must be a dict object."), 400
+
+    # validate required keys
+    # require 'holdings'
+    if "holdings" not in obj or not isinstance(obj["holdings"], dict):
+        return jsonify(ok=False, error="Portfolio must include a 'holdings' object."), 400
+    # require 'cash_balance'
+    if "cash_balance" not in obj or not _is_number(obj["cash_balance"]):
+        return jsonify(ok=False, error="Portfolio must include numeric 'cash_balance'."), 400
+    # transactions & limit_orders can be empty lists but must exist
+    if "transactions" not in obj or not isinstance(obj["transactions"], list):
+        return jsonify(ok=False, error="Portfolio must include 'transactions' (array)."), 400
+    if "limit_orders" not in obj or not isinstance(obj["limit_orders"], list):
+        return jsonify(ok=False, error="Portfolio must include 'limit_orders' (array)."), 400
+
+    # validate holdings
+    # example: {"AAPL": [shares, avg_price], ...}
+    invalid_holdings = []
+    for t, val in obj["holdings"].items():
+        if not isinstance(t, str) or not TICKER_RE.match(t.upper()):
+            invalid_holdings.append(f"{t} (invalid ticker format)")
+            continue
+        # item must be a list/tuple
+        # with exactly 2 items
+        # item 0 = shares, which must be an int greater than or equal to 0
+        # item 1 = avg_price, which must a num greater than or equal to 0
+        if not (isinstance(val, (list, tuple)) and len(val) == 2 and
+                isinstance(val[0], int) and _is_number(val[1]) and val[0] >= 0 and val[1] >= 0):
+            invalid_holdings.append(f"{t} (expected [shares:int>=0, avg_price:number>=0])")
+    if invalid_holdings:
+        return jsonify(ok=False, error="Invalid holdings: " + ", ".join(invalid_holdings[:5])), 400
+
+    # validate transactions
+    invalid_tx = 0
+    for tx in obj["transactions"]:
+        if not isinstance(tx, dict):
+            invalid_tx += 1; 
+            break
+        if not isinstance(tx.get("type"), str): 
+            invalid_tx += 1; 
+            break
+        t = tx.get("ticker")
+        if not isinstance(t, str) or not (t.upper() == "CASH" or TICKER_RE.match(t.upper())):
+            invalid_tx += 1; 
+            break
+        if not _is_number(tx.get("shares", 0)) or not _is_number(tx.get("price", 0)):
+            invalid_tx += 1; 
+            break
+        if not isinstance(tx.get("time", ""), str):
+            invalid_tx += 1; 
+            break
+
+    if invalid_tx:
+        return jsonify(ok=False, error="Invalid 'transactions' entries."), 400
+
+    # validate limit_orders (allow empty)
+    invalid_lo = 0
+    for lo in obj["limit_orders"]:
+        if not isinstance(lo, dict):
+            invalid_lo += 1; 
+            break
+        if not isinstance(lo.get("type"), str): 
+            invalid_lo += 1; 
+            break
+        t = lo.get("ticker")
+        if not isinstance(t, str) or not TICKER_RE.match(t.upper()):
+            invalid_lo += 1; 
+            break
+        if not _is_number(lo.get("shares", 0)) or not _is_number(lo.get("price", 0)):
+            invalid_lo += 1; 
+            break
+        if not isinstance(lo.get("time", ""), str):
+            invalid_lo += 1; 
+            break
+    if invalid_lo:
+        return jsonify(ok=False, error="Invalid 'limit_orders' entries."), 400
+
+    # write raw content
+    with open(portfolio_file, "wb") as out:
+        out.write(text.encode("utf-8"))
+
+    # reload portfolio
+    try:
+        reload_portfolio()
+    except Exception:
+        pass
+    return jsonify(ok=True), 200
+
+
+MAX_WATCHLIST = 500 # for safety reasons
+@app.route('api/watchlist/upload', method=['POST'])
+def upload_watchlist_txt():
+    # basic file checks
+    if "file" not in request.files:
+        return {"error": "No file in requests"}, 400
+    fp = request.files["file"]
+    if not fp or fp.filename == "":
+        return {"error": "No file selected."}, 400
+
+    # file name is exactly 'watchlist.txt'
+    fname = secure_filename(fp.filename)
+    if fname != "watchlist.txt":
+        return {"error": "File must be named 'watchlist.txt'."}, 400
+
+    # check file is in UTF-8 format
+    try:
+        text = fp.read().decode("utf-8-sig", errors="strict")
+    except UnicodeDecodeError:
+        return {"error": "File must be UTF-8 text."}, 400
+
+    # reject potential JSON file formatting.
+    if "{" in text or "}" in text:
+        return {"error": "This looks like a portfolio JSON file. Upload a plain-text watchlist (tickers separated by new lines, or any whitespace)."}, 400
+
+    # split on ANY whitespace including new lines and normalize to uppercase
+    tokens = re.split(r"\s+", text.strip())
+    tokens = [t.upper() for t in tokens if t.strip()]
+
+    if not tokens:
+        return {"error": "Empty Watchlist."}, 400
+    if len(tokens) > MAX_WATCHLIST:
+        return {"error": f"Too many tickers (> {MAX_WATCHLIST}). Aborting for safety reasons."}, 400
+
+    # validate and remove duplicates if needed
+    symbols = []
+    seen = set()
+    invalid = []
+    for t in tokens:
+        if t in seen:
+            continue
+        if not TICKER_RE.match(t):
+            invalid.append(t)
+            continue
+        seen.add(t)
+        symbols.append(t)
+
+    if invalid:
+        sample = ", ".join(invalid[:5])
+        return {"error": f"Invalid ticker(s): {sample}. Valid tickers are to be composed of A–Z, 0–9, '.', '-' (max 10 chars)"}, 400
+
+    # save in one per line format
+    content = "\n".join(symbols) + "\n"
+    with open(watchlist_file, "w") as out:
+        out.write(content)
+
+    return {"ok": True, "count": len(symbols)}
 
 if __name__ == '__main__':
     app.run(debug=True)
