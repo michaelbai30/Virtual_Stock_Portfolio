@@ -418,6 +418,42 @@ async function renderWatchlist(){
     }
 }
 
+// UPLOAD FILE LOGIC AND BUTTON
+async function uploadFile(url, fileInput) {
+  const file = fileInput.files[0]; // grab first selected file from input type = "file"
+  if (!file){
+    return { error: "No file selected" };
+  }
+  const content = new FormData();
+  content.append("file", file);
+  // send post
+  const res = await fetch(url, { method: "POST", body: content });
+  let body;
+  try { body = await res.json(); } catch { body = { error: "Invalid server response" }; }
+  if (!res.ok) return body.error ? body : { error: res.statusText };
+  return body;
+}
+
+document.getElementById("portfolioUploadBtn")?.addEventListener("click", async () => {
+  const status = document.getElementById("importStatus");
+  status.textContent = "Uploading portfolio.txt.";
+  const res = await uploadFile("/api/portfolio/upload", document.getElementById("portfolioUpload"));
+  status.textContent = res.ok ? "Portfolio imported. Refreshing..." : (res.error || "Import failed");
+  if (res.ok) {
+    window.location.reload();
+  }
+});
+
+document.getElementById("watchlistUploadBtn")?.addEventListener("click", async () => {
+  const status = document.getElementById("importStatus");
+  status.textContent = "Uploading watchlist.txt.";
+  const res = await uploadFile("/api/watchlist/upload", document.getElementById("watchlistUpload"));
+  status.textContent = res.ok ? "Watchlist imported. Refreshing..." : (res.error || "Import failed");
+  if (res.ok) {
+    window.location.reload();
+  }
+});
+
 document.addEventListener("DOMContentLoaded", () => {
   loadPortfolio();
   loadSummary();
