@@ -11,10 +11,11 @@
   <div id="tabs">
     <button type="button" onclick="showTab('tab-stock')">Stock Info</button>
     <button type="button" onclick="showTab('tab-portfolio')">My Portfolio</button>
+    <button type="button" onclick="showTab('tab-save-load')">Save / Load Data </button>
   </div>
 
 <!-- Stock Info Section -->
-<!-- stock chart -->
+  <!-- stock chart -->
   <div id="tab-stock">
     <h1> Stock Info </h1>
     <section id="stock-chart">
@@ -115,11 +116,49 @@
     </div>
   </div>
 
+ <!-- Save / Load tab panel -->
+<div id="tab-save-load" hidden>
+  <h1>Download or Upload Data</h1>
+  <!-- Download -->
+  <div>
+    <strong>Download</strong>
+    <div style="color:white;">
+      <a href="/api/portfolio.txt" download style="color:inherit">portfolio.txt</a> |
+      <a href="/api/watchlist.txt" download style="color:inherit">watchlist.txt</a>
+    </div>
+  </div>
+
+  <!-- Upload -->
+  <div style="margin-top: 0.5rem; border-top: 1px solid white; padding-top: 0.5rem;">
+    <strong>Upload</strong>
+    <p style="margin:.25rem 0 .75rem; color:#6b7280;">
+      Upload files named exactly <code>portfolio.txt</code> and <code>watchlist.txt</code>.
+    </p>
+
+    <div>
+      <label>Import <code>portfolio.txt</code>:
+        <input type="file" id="portfolioUpload" accept=".txt,application/json">
+      </label>
+      <button id="portfolioUploadBtn" type="button">Upload</button>
+    </div>
+
+    <div style="margin-top: 0.5rem;">
+      <label>Import <code>watchlist.txt</code>:
+        <input type="file" id="watchlistUpload" accept=".txt">
+      </label>
+      <button id="watchlistUploadBtn" type="button">Upload</button>
+    </div>
+
+    <div id="importStatus" class="status" style="margin-top: 0.5rem;"></div>
+  </div>
+</div>
+
   <script>
     // switch tabs
     function showTab(id) {
       document.getElementById('tab-stock').hidden = true;
       document.getElementById('tab-portfolio').hidden = true;
+      document.getElementById('tab-save-load').hidden = true;
       document.getElementById(id).hidden = false;
     }
     // fetch portfolio to display buying power number in stock info tab
