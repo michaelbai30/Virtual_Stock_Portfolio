@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: virtual-stock-portfolio
+    env: python
+    rootDir: stocks/server
+    buildCommand: pip install -r ../requirements.txt
+    startCommand: gunicorn -w 2 -k gthread -b 0.0.0.0:$PORT app:app
+    disk:
+      name: app-data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: STORAGE_ROOT
+        value: /var/data
