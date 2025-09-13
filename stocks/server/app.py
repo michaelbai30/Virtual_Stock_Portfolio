@@ -42,12 +42,14 @@ def home():
 # return JSON containing portfolio total value, cash balance, and allocations
 @app.route('/api/summary', methods=['GET'])
 def summary():
+    reload_portfolio()
     # jsonify converts Python dict to JSON http
     return jsonify(get_portfolio_summary())
 
 # get portfolio data as a json
 @app.route('/api/portfolio', methods=['GET'])
 def portfolio():
+    reload_portfolio()
     run_limit_checks() # auto-trigger any queued orders before returning data
     return jsonify(get_portfolio_data()) 
 
