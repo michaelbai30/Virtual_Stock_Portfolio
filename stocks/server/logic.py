@@ -7,9 +7,10 @@ from portfolio.portfolio import Portfolio
 from data.pricing import get_price
 from data.plotting import plot_stock_price
 
-# loads the saveed portfolio from disk
-portfolio_file = "portfolio.txt"
-watchlist_file = "watchlist.txt"
+# loads the saved portfolio from persistent disk
+BASE_DIR = os.environ.get("STORAGE_ROOT", os.path.dirname(os.path.abspath(__file__)))
+portfolio_file = os.path.join(BASE_DIR, "portfolio.txt")
+watchlist_file = os.path.join(BASE_DIR, "watchlist.txt")
 portfolio = Portfolio.load_file(portfolio_file)
 
 def reload_portfolio():
