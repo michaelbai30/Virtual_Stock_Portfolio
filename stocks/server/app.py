@@ -153,7 +153,7 @@ def api_remove_from_watchlist(symbol):
 
 
 # DOWNLOAD RAW FILES
-@app.route('/api/portfolio.txt', method=['GET'])
+@app.route('/api/portfolio.txt', methods=['GET'])
 def download_portfolio_txt():
     try:
         with open(portfolio_file, "r") as fp:
@@ -167,7 +167,7 @@ def download_portfolio_txt():
         headers={"Content-Disposition": "attachment; filename=portfolio.txt"}
     )
 
-@app.route('/api/watchlist.txt', method=['GET'])
+@app.route('/api/watchlist.txt', methods=['GET'])
 def download_watchlist_txt():
     try:
         with open(watchlist_file, "r") as fp:
@@ -184,7 +184,7 @@ def download_watchlist_txt():
 TICKER_RE = re.compile(r'^[A-Z][A-Z0-9.\-]{0,9}$') # < 10 chars max, letters, digits, ., -, must start with a letter.
 def _is_number(n): return isinstance(n, (int, float)) and not isinstance(n, bool)
 
-@app.route('/api/portfolio/upload', method=['POST'])
+@app.route('/api/portfolio/upload', methods=['POST'])
 def upload_portfolio_txt():
     # basic file checks
     if "file" not in request.files:
@@ -300,7 +300,7 @@ def upload_portfolio_txt():
 
 
 MAX_WATCHLIST = 500 # for safety reasons
-@app.route('api/watchlist/upload', method=['POST'])
+@app.route('/api/watchlist/upload', methods=['POST'])
 def upload_watchlist_txt():
     # basic file checks
     if "file" not in request.files:
