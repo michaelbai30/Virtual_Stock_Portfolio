@@ -344,6 +344,40 @@ async function depositFunds(){
   }
 }
 
+// function to send request to /api/withdraw to withdraw funds
+async function withdrawFunds(){
+  const input = document.getElementById('withdraw-amount')
+  const message = document.getElementById('withdraw-message')
+  const amount = parseFloat(input.value)
+
+  try{
+    const result = await fetch('/api/withdraw',{
+      method: 'POST',
+       headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({amount})
+    })
+
+    const data = await result.json();
+
+    if (data.error){
+      message.style.color = 'red';
+      message.textContent = data.error;
+      return;
+    }
+
+    message.style.color = 'lightgreen';
+    message.textContent = data.message;
+    input.value='';
+
+  }
+  catch(err){
+    message.textContent = "Error submitting order.";
+    message.style.color = "red";
+  }
+}
+
 // WATCHLIST
 async function getWatchlist(){
   const res = await fetch('/api/watchlist');
@@ -478,3 +512,4 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }, 15000);
 });
+
