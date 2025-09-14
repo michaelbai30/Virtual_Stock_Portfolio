@@ -1,181 +1,341 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title> Stock Portfolio</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-  <script src="{{ url_for('static', filename='script.js') }}" defer></script>
-</head>
-<body>
-  <!-- tab buttons to switch pages -->
-  <div id="tabs">
-    <button type="button" onclick="showTab('tab-stock')">Stock Info</button>
-    <button type="button" onclick="showTab('tab-portfolio')">My Portfolio</button>
-    <button type="button" onclick="showTab('tab-save-load')">Save / Load Data </button>
-  </div>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Virtual Stock Portfolio</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+    <script src="{{ url_for('static', filename='script.js') }}" defer></script>
+  </head>
+  <body>
+    <!-- tab buttons to switch pages -->
+    <div id="tabs">
+      <button type="button" onclick="showTab('tab-stock')">Stock Info</button>
+      <button type="button" onclick="showTab('tab-portfolio')">My Portfolio</button>
+      <button type="button" onclick="showTab('tab-save-load')">Save / Load Data</button>
+      <button type="button" onclick="showTab('tab-about')">About and Help</button>
+    </div>
 
-<!-- Stock Info Section -->
-  <!-- stock chart -->
-  <div id="tab-stock">
-    <h1> Stock Info </h1>
-    <section id="stock-chart">
-      <h1> Stock Chart </h1>
-      <input type="text" id="chart-symbol" placeholder="Enter ticker (ex: AAPL)">
-      <div id="timeframes">
-        <button onclick="loadChart('1d')"> 1d </button>
-        <button onclick="loadChart('1w')"> 1w </button>
-        <button onclick="loadChart('1m')"> 1m </button>
-        <button onclick="loadChart('3m')"> 3m </button>
-        <button onclick="loadChart('1y')"> 1y </button>
-        <button onclick="loadChart('5y')"> 5y </button>
-      </div>
-      <div id="chart-container">
-        <iframe id="chart-frame" style="width: 100%; height: 600px; border: none;"></iframe>
-      </div>
-      <p id="chart-result"></p>
-    </section>
-
-    <!-- stock price -->
-    <section id="price-lookup">
-      <h2> Price Lookup</h2>
-      <input type="text" id="lookup-ticker" placeholder="ex: AAPL">
-      <button onclick="getLivePrice()">Get Price</button>
-      <div id="price-result"><p id="live-price-result"> </p></div>
-    </section>
-
-    <!-- watchlist -->
-     <section id="watchlist-section">
-      <h2> Watchlist </h2>
-      <input id="watchlist-input" type="text" placeholder="Ticker (ex: AAPL)">
-      <button onclick="addToWatchlist()"> Add </button>
-      <ul id="watchlist-list" style="list-style-type:none; padding-left:0;"></ul>
-     </section>
-
-    <!-- market order form -->
-    <section>
-      <h2> Buy / Sell </h2>
-       <p><strong>Buying Power:</strong> <span id="stock-info-cash"></span></p>
-      <input id="trade-symbol" type="text" placeholder="Ticker (ex: AAPL)">
-      <input id="trade-shares" type="number" placeholder="Shares" min="1">
-      <button onclick="buyStock(); getLivePrice()">Buy</button>
-      <button onclick="sellStock(); getLivePrice()">Sell</button>
-      <p id="purchase-result"> </p>
-    </section>
-
-    <!-- limit/stop order form -->
-    <section id="limit-order-form">
-      <h2> Place Limit/Stop Orders</h2>
-      <input type="text" id="limit-symbol" placeholder="Ticker (ex: AAPL)">
-      <input type="text" id="limit-shares" placeholder="Shares" min="1">
-      <input type="text" id="limit-price" placeholder="Target Price" min="0" step="0.01">
-      <select id="limit-type">
-        <option value="LB"> Limit Buy </option>
-        <option value="SB"> Stop Buy </option>
-        <option value="LS"> Limit Sell </option>
-        <option value="SL"> Stop Loss </option>
-      </select>
-      <button onclick="submitLimitOrder()"> Place Order </button>
-      <p id="limit-order-result"></p>
-    </section>
-  </div>
-
-  <!-- My Portfolio Section -->
-  <div id="tab-portfolio" hidden>
-    <h1> My Portfolio</h1>
-    <div><button onclick="loadPortfolio()">Refresh Portfolio</button></div>
-    <section>
-      <h2> Deposit Funds </h2>
-      <input id="deposit-amount" type="number" placeholder="Amount" min="0.01" step=0.01>
-      <button onclick="depositFunds()">Deposit</button>
-      <p id="deposit-message"></p>
-    </section> 
-    <div id="portfolio">
-     <p style="display:none">
-      <span id="cash"></span>
-      <span id="value"></span>
-    </p>
-      <section id="portfolio-summary">
-        <h2>PL and Allocations</h2>
-        <div id="summary-data"></div>
+    <!-- Stock Info Section -->
+    <!-- stock chart -->
+    <div id="tab-stock">
+      <h1>Stock Info</h1>
+      <section id="stock-chart">
+        <h1>Stock Chart</h1>
+        <input type="text" id="chart-symbol" placeholder="Enter ticker (ex: AAPL)" />
+        <div id="timeframes">
+          <button onclick="loadChart('1d')">1d</button>
+          <button onclick="loadChart('1w')">1w</button>
+          <button onclick="loadChart('1m')">1m</button>
+          <button onclick="loadChart('3m')">3m</button>
+          <button onclick="loadChart('1y')">1y</button>
+          <button onclick="loadChart('5y')">5y</button>
+        </div>
+        <div id="chart-container">
+          <iframe id="chart-frame" style="width: 100%; height: 600px; border: none;"></iframe>
+        </div>
+        <p id="chart-result"></p>
       </section>
-      <section>
-        <h2> Holdings</h2>
-        <ul id="holdings"></ul>
+
+      <!-- stock price -->
+      <section id="price-lookup">
+        <h2>Price Lookup</h2>
+        <input type="text" id="lookup-ticker" placeholder="ex: AAPL" />
+        <button onclick="getLivePrice()">Get Price</button>
+        <div id="price-result">
+          <p id="live-price-result"></p>
+        </div>
       </section>
+
+      <!-- watchlist -->
+      <section id="watchlist-section">
+        <h2>Watchlist</h2>
+        <input id="watchlist-input" type="text" placeholder="Ticker (ex: AAPL)" />
+        <button onclick="addToWatchlist()">Add</button>
+        <ul id="watchlist-list" style="list-style-type: none; padding-left: 0;"></ul>
+      </section>
+
+      <!-- market order form -->
       <section>
-        <h2> Transactions</h2>
-        <ul id="transactions"></ul>
-       
+        <h2>Buy / Sell</h2>
+        <p><strong>Buying Power:</strong> <span id="stock-info-cash"></span></p>
+        <input id="trade-symbol" type="text" placeholder="Ticker (ex: AAPL)" />
+        <input id="trade-shares" type="number" placeholder="Shares" min="1" />
+        <button onclick="buyStock(); getLivePrice()">Buy</button>
+        <button onclick="sellStock(); getLivePrice()">Sell</button>
+        <p id="purchase-result"></p>
+      </section>
+
+      <!-- limit/stop order form -->
+      <section id="limit-order-form">
+        <h2>Place Limit/Stop Orders</h2>
+        <input type="text" id="limit-symbol" placeholder="Ticker (ex: AAPL)" />
+        <input type="text" id="limit-shares" placeholder="Shares" min="1" />
+        <input type="text" id="limit-price" placeholder="Target Price" min="0" step="0.01" />
+        <select id="limit-type">
+          <option value="LB">Limit Buy</option>
+          <option value="SB">Stop Buy</option>
+          <option value="LS">Limit Sell</option>
+          <option value="SL">Stop Loss</option>
+        </select>
+        <button onclick="submitLimitOrder()">Place Order</button>
+        <p id="limit-order-result"></p>
+      </section>
+    </div>
+
+    <!-- My Portfolio Section -->
+    <div id="tab-portfolio" hidden>
+      <h1>My Portfolio</h1>
+      <div>
+        <button onclick="loadPortfolio()">Refresh Portfolio</button>
+      </div>
+      <section>
+        <h2>Deposit Funds</h2>
+        <input id="deposit-amount" type="number" placeholder="Amount" min="0.01" step="0.01" />
+        <button onclick="depositFunds()">Deposit</button>
+        <p id="deposit-message"></p>
+
+        <h2>Withdraw Funds</h2>
+        <input id="withdraw-amount" type="number" placeholder="Amount" min="0.01" step="0.01" />
+        <button onclick="withdrawFunds()">Withdraw</button>
+        <p id="withdraw-message"></p>
+      </section>
+      <div id="portfolio">
+        <p style="display: none">
+          <span id="cash"></span>
+          <span id="value"></span>
+        </p>
+        <section id="portfolio-summary">
+          <h2>PL and Allocations</h2>
+          <div id="summary-data"></div>
+        </section>
+        <section>
+          <h2>Holdings</h2>
+          <ul id="holdings"></ul>
+        </section>
+        <section>
+          <h2>Transactions</h2>
+          <ul id="transactions"></ul>
+          <div style="color: white;">
+            <a href="/api/transactions.txt" download style="color: inherit">Download full history (.txt)</a>
+          </div>
+
+          <h2>Pending Limit / Stop Orders</h2>
+          <ul id="limit-orders"></ul>
+        </section>
+      </div>
+    </div>
+
+    <!-- Save / Load tab panel -->
+    <div id="tab-save-load" hidden>
+      <h1>Download or Upload Data</h1>
+      <!-- Download -->
+      <div>
+        <strong>Download</strong>
+        <div style="color: white;">
+          <a href="/api/portfolio.txt" download style="color: inherit">portfolio.txt</a> |
+          <a href="/api/watchlist.txt" download style="color: inherit">watchlist.txt</a>
+        </div>
+      </div>
+
+      <!-- Upload -->
+      <div style="margin-top: 0.5rem; border-top: 1px solid white; padding-top: 0.5rem;">
+        <strong>Upload</strong>
+        <p style="margin: 0.25rem 0 0.75rem; color: #6b7280;">
+          Upload files named exactly <code>portfolio.txt</code> and <code>watchlist.txt</code>.
+        </p>
+
         <div>
-        <a href="/api/transactions.txt" download>Download full history (.txt)</a>
-       </div>
+          <label>
+            Import <code>portfolio.txt</code>:
+            <input type="file" id="portfolioUpload" accept=".txt,application/json" />
+          </label>
+          <button id="portfolioUploadBtn" type="button">Upload</button>
+        </div>
 
-        <h2> Pending Limit / Stop Orders</h2>
-        <ul id="limit-orders"> </ul>
+        <div style="margin-top: 0.5rem;">
+          <label>
+            Import <code>watchlist.txt</code>:
+            <input type="file" id="watchlistUpload" accept=".txt" />
+          </label>
+          <button id="watchlistUploadBtn" type="button">Upload</button>
+        </div>
+
+        <div id="importStatus" class="status" style="margin-top: 0.5rem;"></div>
+      </div>
+    </div>
+
+    <!-- About + Help -->
+    <div id="tab-about" hidden>
+      <h1>About + Help</h1>
+      <section>
+        <h2>About</h2>
+        <p>
+          This is a <strong>full-stack stock "paper" trading simulator</strong> that lets you buy, sell, and analyze
+          real-time stock market data using the Yahoo Finance API. <br />
+          It supports technical indicators, visualizations, portfolio tracking, limit/stop orders, and a persistent
+          holdings storage system. <br />
+          The goal of this app is to enable individuals to <strong>practice trading strategies</strong>on the market
+          with fake "paper" money, as well as perform basic stock analysis. <br />
+          Developer: Michael Bai
+        </p>
       </section>
+      <section>
+        <h2>Getting Started</h2>
+        <p>
+          When you first load into the app, the default portfolio starts with <strong>$1,000</strong> buying power and
+          <strong>1 share each</strong> of <code>AAPL</code>, <code>AMZN</code>, and <code>GOOG</code>. <br />
+          Try looking up prices, add a few symbols to your watchlist, then place a small buy or sell to see your P/L
+          update in real time.
+        </p>
+        <p><strong>Popular tickers to try:</strong></p>
+        <p>AAPL, MSFT, AMZN, GOOG, NVDA, TSLA, META, NFLX, BRK.B</p>
+      </section>
+      <section>
+        <h2>Tech Stack and Features</h2>
+        <ul>
+          <li><strong>Frontend:</strong> HTML + CSS + JavaScript</li>
+          <li><strong>Backend:</strong> Python (Flask)</li>
+          <li><strong>Market Data API:</strong> yfinance (Yahoo! Finance)</li>
+          <li><strong>Charts:</strong> Server-generated candlestick charts with overlays/indicators using Plotly Python</li>
+          <li><strong>Persistence:</strong> Files <code>portfolio.txt</code> and <code>watchlist.txt</code></li>
+          <li><strong>Deployment:</strong> Render</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Stock Info Tab</h2>
+        <ol>
+          <li>
+            <strong>Stock Chart</strong> — Enter a valid ticker and view candlestick charts for
+            <code>1d</code>, <code>1w</code>, <code>1m</code>, <code>3m</code>, <code>1y</code>, or <code>5y</code>,
+            with:
+            <ul>
+              <li><strong>MA10</strong>: 10-period simple moving average (near-term trend)</li>
+              <li><strong>MA20</strong>: 20-period simple moving average (short/medium trend)</li>
+              <li><strong>MA200</strong>: 200-period simple moving average (long-term trend)</li>
+              <li>
+                <strong>RSI(14)</strong>: 14-period Relative Strength Index (momentum). Values near 70 imply overbought;
+                near 30 imply oversold.
+              </li>
+            </ul>
+          </li>
+          <br />
+          <li>
+            <strong>Price Lookup</strong> — Enter any valid ticker to see the current price and today’s percent change.
+          </li>
+          <br />
+          <li>
+            <strong>Watchlist</strong> — Add/remove tickers to track. Each item shows live price and day % change. The
+            list refreshes automatically every <strong>15 seconds</strong> and persists in <code>watchlist.txt</code>.
+          </li>
+          <br />
+          <li>
+            <strong>Buy / Sell</strong> — Shows current buying power. Enter a ticker and number of shares to place a
+            market order (buy or sell shares).
+          </li>
+          <br />
+          <li>
+            <strong>Place Limit / Stop Orders</strong> — Enter ticker, shares, and target price, then choose:
+            <ul>
+              <li><strong>Limit Buy (LB)</strong>: Buy only if price drops to or below your limit.</li>
+              <li><strong>Stop Buy (SB)</strong>: Buy once price rises to your stop price (buying for momentum)</li>
+              <li><strong>Limit Sell (LS)</strong>: Sell only if price rises to or above your limit (take profit).</li>
+              <li><strong>Stop Loss (SL)</strong>: Sell if price falls to your stop price (cap downside).</li>
+            </ul>
+            <br />
+            The app checks for pending limit / stop orders every <strong>15 seconds</strong>.
+          </li>
+        </ol>
+      </section>
+
+      <section>
+        <h2>My Portfolio Tab</h2>
+        <ol>
+          <li><strong>Deposit Funds</strong> — Add paper cash to your account balance (Fake Money).</li> <br>
+          <li><strong>Deposit Funds</strong> — Remove paper cash from your account balance.</li>
+          <li>
+            <strong>P/L and Allocations</strong> — Shows total portfolio value, buying power, and total Profit/Loss
+            (amount and %). <strong> Per holding: ticker, shares, value, allocation %, P/L, and P/L %. </strong>
+          </li>
+          <li>
+            <strong>Holdings</strong> — Displays each position held in the format
+            <code>TICKER: X shares @ $Y (avg cost)</code>. Positions with zero shares are automatically removed.
+          </li>
+          <li>
+            <strong>Transactions</strong> — Persistent log for BUY/SELL/DEPOSIT and executed limit/stop orders,
+            including time, ticker, shares, and price.
+          </li>
+          <li><strong>Pending Limit / Stop Orders</strong> — Any orders waiting to trigger.</li>
+        </ol>
+      </section>
+
+      <section>
+        <h2>Save / Load Data tab</h2>
+        <p>Download or upload your data files. Filenames and formats must match:</p>
+        <ul>
+          <li>
+            <strong>Download</strong> — Get <code>portfolio.txt</code> (raw JSON) and <code>watchlist.txt</code> (plain
+            text).
+          </li>
+          <li>
+            <strong>Upload</strong> — Restore state by importing the files:
+            <ul>
+              <li><strong>Exact filenames required:</strong> <code>portfolio.txt</code> and <code>watchlist.txt</code>.</li>
+              <li>
+                <strong>portfolio.txt</strong>: JSON (raw, unformatted is fine). Example:
+                <pre><code>{
+  "holdings": { "AAPL": [5, 210.25], "MSFT": [2, 412.10] },
+  "cash_balance": 1500.00,
+  "transactions": [],
+  "limit_orders": []
+}</code></pre>
+              </li>
+              <li>
+                <strong>watchlist.txt</strong>: Tickers separated by newlines (standard) or any whitespace. Example:
+                <pre><code>AAPL
+MSFT
+GOOG
+AMD</code></pre>
+              </li>
+            </ul>
+          </li>
+        </ul>
+        <p><em>Note:</em> Uploads are validated. Invalid filenames or formats are rejected with an error message.</p>
+      </section>
+      
     </div>
-  </div>
-
- <!-- Save / Load tab panel -->
-<div id="tab-save-load" hidden>
-  <h1>Download or Upload Data</h1>
-  <!-- Download -->
-  <div>
-    <strong>Download</strong>
-    <div style="color:white;">
-      <a href="/api/portfolio.txt" download style="color:inherit">portfolio.txt</a> |
-      <a href="/api/watchlist.txt" download style="color:inherit">watchlist.txt</a>
-    </div>
-  </div>
-
-  <!-- Upload -->
-  <div style="margin-top: 0.5rem; border-top: 1px solid white; padding-top: 0.5rem;">
-    <strong>Upload</strong>
-    <p style="margin:.25rem 0 .75rem; color:#6b7280;">
-      Upload files named exactly <code>portfolio.txt</code> and <code>watchlist.txt</code>.
-    </p>
-
-    <div>
-      <label>Import <code>portfolio.txt</code>:
-        <input type="file" id="portfolioUpload" accept=".txt,application/json">
-      </label>
-      <button id="portfolioUploadBtn" type="button">Upload</button>
-    </div>
-
-    <div style="margin-top: 0.5rem;">
-      <label>Import <code>watchlist.txt</code>:
-        <input type="file" id="watchlistUpload" accept=".txt">
-      </label>
-      <button id="watchlistUploadBtn" type="button">Upload</button>
-    </div>
-
-    <div id="importStatus" class="status" style="margin-top: 0.5rem;"></div>
-  </div>
-</div>
-
-  <script>
-    // switch tabs
-    function showTab(id) {
-      document.getElementById('tab-stock').hidden = true;
-      document.getElementById('tab-portfolio').hidden = true;
-      document.getElementById('tab-save-load').hidden = true;
-      document.getElementById(id).hidden = false;
-    }
-    // fetch portfolio to display buying power number in stock info tab
-    async function updateStockInfoCash(){
-      try{
-        const res = await fetch("/api/portfolio");
-        const data = await res.json();
-        document.getElementById("stock-info-cash").textContent = `$${data.cash_balance.toFixed(2)}`;
-      } catch(e){
-        document.getElementById("stock-info-cash").textContent = "—";
+    <!-- GitHub footer -->
+    <footer style="text-align:center;margin-top:8px;">
+      <a href="https://github.com/michaelbai30" target="_blank" rel="noopener" style="color:inherit;text-decoration:none">
+        <svg viewBox="0 0 16 16" width="24" height="24" style="vertical-align:text-bottom" aria-hidden="true">
+          <path d="M8 0C3.58 0 0 3.64 0 8.13c0 3.6 2.29 6.64 5.47 7.72.4.08.55-.18.55-.39 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.5-2.69-.96-.09-.23-.48-.96-.82-1.16-.28-.15-.68-.52-.01-.53.63-.01 1.08.59 1.23.83.72 1.23 1.87.88 2.33.67.07-.53.28-.88.51-1.08-1.78-.2-3.64-.9-3.64-3.99 0-.88.31-1.6.82-2.17-.08-.2-.36-1.02.08-2.12 0 0 .67-.22 2.2.83.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.06 2.2-.83 2.2-.83.44 1.1.16 1.92.08 2.12.51.57.82 1.29.82 2.17 0 3.1-1.87 3.79-3.65 3.99.29.26.54.76.54 1.54 0 1.11-.01 2-.01 2.27 0 .21.15.47.55.39A8.14 8.14 0 0 0 16 8.13C16 3.64 12.42 0 8 0Z"/>
+        </svg> github.com/michaelbai30
+      </a>
+    </footer>
+    <script>
+      // switch tabs
+      function showTab(id) {
+        document.getElementById('tab-stock').hidden = true;
+        document.getElementById('tab-portfolio').hidden = true;
+        document.getElementById('tab-save-load').hidden = true;
+        document.getElementById('tab-about').hidden = true;
+        document.getElementById(id).hidden = false;
       }
-    }
-    // document on load
-    document.addEventListener("DOMContentLoaded", () => {
-      showTab('tab-stock');    
-      updateStockInfoCash();   
-    });
-  </script>
-</body>
+      // fetch portfolio to display buying power number in stock info tab
+      async function updateStockInfoCash() {
+        try {
+          const res = await fetch('/api/portfolio');
+          const data = await res.json();
+          document.getElementById('stock-info-cash').textContent = `$${data.cash_balance.toFixed(2)}`;
+        } catch (e) {
+          document.getElementById('stock-info-cash').textContent = '—';
+        }
+      }
+      // document on load
+      document.addEventListener('DOMContentLoaded', () => {
+        showTab('tab-stock');
+        updateStockInfoCash();
+      });
+    </script>
+  </body>
 </html>
