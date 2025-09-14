@@ -172,6 +172,25 @@ def deposit_funds(amount: float):
     portfolio.save_file(portfolio_file)
     return {"message": f"Deposited ${round(amount, 2)} successfully to cash balance. Please give some time for cash to settle."}
    
+# withdraw buying power from account, essentially removing money
+def withdraw_funds(amount: float):
+    try:
+        amount = float(amount)
+    except (TypeError, ValueError):
+        return {"error": "Invalid Amount"} 
+    if amount <= 0:
+        return {"error" : "Amount must be positive."}
+    # update cash balance
+    portfolio.cash_balance -= amount
+    portfolio.transactions.append({
+        "time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "type": "WITHDRAW",
+        "ticker": "CASH",
+        "shares": round(amount, 2),
+        "price": round(amount, 2)
+    })
+    portfolio.save_file(portfolio_file)
+    return {"message": f"Withdrew ${round(amount, 2)} successfully. Please give some time for cash to settle."}
 
 # create transactions.txt file from portfolio.transactions
 def format_transactions_text() -> str:
@@ -229,5 +248,3 @@ def remove_from_watchlist(ticker: str):
         save_watchlist(watchlist)
         return {"message": f"Removed {new_t} from watchlist.", "tickers": watchlist}
     return {"error": f"{new_t} not in watchlist.", "tickers": watchlist}
-
-
