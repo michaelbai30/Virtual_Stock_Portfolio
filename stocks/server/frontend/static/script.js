@@ -138,7 +138,8 @@ async function buyStock() {
     result.style.color = "lightgreen"
     result.innerHTML = json.message
   }
-  loadPortfolio();  
+
+  await Promise.all([loadPortfolio(), loadSummary()]) 
 }
 
 // submit market order to sell to the backend and refreshes the portfolio view
@@ -170,7 +171,7 @@ async function sellStock() {
     result.style.color = "lightgreen"
     result.innerHTML = json.message
   }
-  loadPortfolio();
+  await Promise.all([loadPortfolio(), loadSummary()])
 }
 
 // globals
