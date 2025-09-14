@@ -22,6 +22,7 @@ from logic import(
     add_limit_order,
     run_limit_checks,
     deposit_funds,
+    withdraw_funds,
     format_transactions_text,
     get_watchlist,
     add_to_watchlist,
@@ -128,6 +129,13 @@ def api_deposit():
     data = request.get_json()
     amount = data.get('amount', 0)
     return jsonify(deposit_funds(amount))
+
+# withdraw funds
+@app.route('/api/withdraw', methods=['POST'])
+def api_withdraw():
+    data = request.get_json()
+    amount = data.get('amount', 0)
+    return jsonify(withdraw_funds(amount))
 
 # endpoint to download transactions.txt
 @app.route('/api/transactions.txt', methods=['GET'])
