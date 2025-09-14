@@ -2,21 +2,24 @@
 import sys
 import os
 import datetime
+import threading
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../cli_src')))
 from portfolio.portfolio import Portfolio
 from data.pricing import get_price
 from data.plotting import plot_stock_price
 
-# loads the saved portfolio from persistent disk
+# loads the saveed portfolio from disk
 BASE_DIR = os.environ.get("STORAGE_ROOT", os.path.dirname(os.path.abspath(__file__)))
 portfolio_file = os.path.join(BASE_DIR, "portfolio.txt")
 watchlist_file = os.path.join(BASE_DIR, "watchlist.txt")
 portfolio = Portfolio.load_file(portfolio_file)
 
+portfolio_lock = threading.RLock()
 def reload_portfolio():
     """Reload portfolio from disk into memory after an upload."""
     global portfolio
-    portfolio = Portfolio.load_file(portfolio_file)
+    with portfolio_lock:
+        portfolio = Portfolio.load_file(portfolio_file)
     return portfolio
 
 # return current portfolio state in json, from the loaded portfolio file
@@ -91,14 +94,22 @@ def buy_stock(ticker: str, shares: int):
 
 # sell stock
 def sell_stock(ticker: str, shares: int):
+    # get latest price
     price = get_price(ticker)
     if price is None:
         return {"error": f"Ticker {ticker} not found."}
 
-    if ticker not in portfolio.holdings or portfolio.holdings[ticker][0] < shares:
+    if ticker not in portfolio.holdings or portfolio.holdings[ticker][0] < shares: 
         return {"error": f"Insufficient shares to sell {shares} of {ticker}."}
+    
+    portfolio.sell_stock(ticker, int(shares))
 
-    portfolio.sell_stock(ticker, shares)
+    # ensure zero-share positions are removed from holdings
+    pos = portfolio.holdings.get(ticker)
+    if pos and int(pos[0]) <= 0:
+        del portfolio.holdings[ticker]
+
+    # persist
     portfolio.save_file(portfolio_file)
     return {"message": f"Sold {shares} shares of {ticker} at price ${price}", "price": price}
 
@@ -151,18 +162,16 @@ def deposit_funds(amount: float):
     
     # update cash balance
     portfolio.cash_balance += amount
-    try:
-         portfolio.transactions.append({
-            "time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "type": "DEPOSIT",
-            "ticker": "CASH",
-            "shares": round(amount, 2),
-            "price": round(amount, 2)
-        })
-         return {"message": f"Deposited ${round(amount, 2)} successfully to cash balance."}
-    except Exception:
-        pass
+    portfolio.transactions.append({
+        "time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "type": "DEPOSIT",
+        "ticker": "CASH",
+        "shares": round(amount, 2),
+        "price": round(amount, 2)
+    })
     portfolio.save_file(portfolio_file)
+    return {"message": f"Deposited ${round(amount, 2)} successfully to cash balance. Please give some time for cash to settle."}
+   
 
 # create transactions.txt file from portfolio.transactions
 def format_transactions_text() -> str:
@@ -220,4 +229,5 @@ def remove_from_watchlist(ticker: str):
         save_watchlist(watchlist)
         return {"message": f"Removed {new_t} from watchlist.", "tickers": watchlist}
     return {"error": f"{new_t} not in watchlist.", "tickers": watchlist}
+
 
