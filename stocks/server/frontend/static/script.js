@@ -3,7 +3,7 @@
 // fetch latest portfolio data from backend and renders cash balance, total portfolio value, current holdings, and recent transactions
 async function loadPortfolio() {
   // call flask api to get full portfolio as json
-  const res = await fetch("http://127.0.0.1:5000/api/portfolio");
+  const res = await fetch("/api/portfolio");
   const data = await res.json();
 
   // get asset values
@@ -122,7 +122,7 @@ async function buyStock() {
   }
 
   // send POST request to flask api with JSON {symbol, shares}
-  const res = await fetch("http://127.0.0.1:5000/api/buy", {
+  const res = await fetch("/api/buy", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({symbol, shares})
@@ -155,7 +155,7 @@ async function sellStock() {
   }
   
   // send POST request to flask api
-  const res = await fetch("http://127.0.0.1:5000/api/sell", {
+  const res = await fetch("/api/sell", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ symbol, shares })
