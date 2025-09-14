@@ -20,10 +20,10 @@ class Portfolio:
                 total_shares = self.holdings[ticker][0] + shares
                 new_avg_price = (cost + self.holdings[ticker][0] * self.holdings[ticker][1]) / total_shares
                 self.holdings[ticker] = [total_shares, round(new_avg_price, 2)]
-                self.transactions.append({"type": "BUY", "ticker" : ticker, "shares" : shares, "price" : price_per_share, "time": str(datetime.datetime.now().replace(microsecond=0))})
             else:
                 # create new holding
                 self.holdings[ticker] = [shares, price_per_share]
+            self.transactions.append({"type": "BUY", "ticker" : ticker, "shares" : shares, "price" : price_per_share, "time": str(datetime.datetime.now().replace(microsecond=0))})
             print(f"Bought {shares} shares of {ticker} at ${price_per_share}")
         else:
             print("Insufficient funds!")
