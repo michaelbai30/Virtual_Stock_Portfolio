@@ -8,7 +8,7 @@ It supports technical indicators, visualizations, portfolio tracking, limit/stop
 
 The goal of this app is to enable individuals to practice trading strategies on the market with fake "paper" money, as well as perform basic stock analysis.
 
-Live Demo Hosted on Render: <url>  
+Live Demo Hosted on Render: https://virtual-stock-portfolio-web-app.onrender.com/
 (Note: On free tiers, the service sleeps when inactive, so allow for ~30–60 seconds for the server to cold-start)
 
 ---
