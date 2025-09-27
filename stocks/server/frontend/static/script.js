@@ -1,4 +1,22 @@
-// script.js: listens for user actions and calls flask API app.py via fetch
+/*
+server/frontend/static/script.js
+
+Frontend controller for the Stock Portfolio app.
+
+Flask Endpoints:
+  GET /api/portfolio, /api/summary, /api/chart?symbol=&period=, /api/price/<ticker>, /api/watchlist
+  POST /api/buy, /api/sell, /api/limit-order, /api/deposit, /api/withdraw, /api/watchlist, /api/portfolio/upload, /api/watchlist/upload
+  DELETE /api/watchlist/<ticker>
+
+Functions:
+  - Load and render portfolio (cash, value, holdings, transactions, pending orders)
+  - Load and render summary (P/L & allocations table)
+  - Chart loader + auto-refresh via /api/chart
+  - Live price lookup
+  - Market buy/sell + limit/stop orders + deposit/withdraw
+  - Watchlist + periodic refresh
+  - File uploads for portfolio.txt & watchlist.txt
+*/
 
 // fetch latest portfolio data from backend and renders cash balance, total portfolio value, current holdings, and recent transactions
 async function loadPortfolio() {
