@@ -1,3 +1,24 @@
+"""
+cli_src/portfolio/portfolio.py
+
+Holds and generates portfolio state, and supports core portfolio operations
+
+State:
+  - cash_balance (float)
+  - holdings: {ticker: [shares:int, avg_price:float]}
+  - transactions: list of {time,type,ticker,shares,price}
+  - limit_orders: list of queued limit/stop orders
+
+Functions:
+  - buy_stock / sell_stock (uses data.pricing.get_price)
+  - queue_limit_order / query_limit_buy_sell
+  - Profit/Loss helpers: track_pl_per_ticker, track_total_pl, portfolio_value
+  - save_file / load_file (JSON on disk)
+
+Used by:
+  - server/logic.py (API wrappers)
+  - CLI display helpers (display_portfolio / graphs)
+"""
 import json
 import datetime
 from data.pricing import get_price
