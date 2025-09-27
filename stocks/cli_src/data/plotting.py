@@ -1,3 +1,15 @@
+"""
+cli_src/data/plotting.py
+
+Builds a candlestick chart with MA10/50/200 and RSI(14) using yfinance + Plotly.
+Fetches extra history to compute MAs, then slices to the requested period.
+If save_path is provided, writes a self-contained HTML file (chart).
+otherwise shows the interactive plot (CLI).
+
+Used by:
+  - logic.generate_stock_chart(...) which calls plot_stock_price(ticker, period, save_path)
+  - CLI via handle_plot_stock_price()
+"""
 import yfinance as yf
 import plotly.graph_objects as go
 import plotly.io as pio
