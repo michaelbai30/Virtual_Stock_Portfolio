@@ -1,3 +1,21 @@
+"""
+cli_src/data/pricing.py
+
+Price helpers using yfinance.
+
+get_stock_data(ticker):
+Returns a small intraday DataFrame of the last ~12 x 5-minute closes
+with a single 'Price' column (index formatted as 'YY-MM-DD HH:MM:SS').
+Returns None on failure or if no data.
+
+get_price(ticker):
+Returns the latest price (rounded to 2 decimals) via Ticker.fast_info['lastPrice'],
+or None if unavailable.
+
+Used by:
+  - logic.py (price lookup API, portfolio summary calculations)
+  - portfolio/portfolio.py (buy/sell cost, P/L, limit checks)
+"""
 import yfinance as yf
 import pandas as pd
 
