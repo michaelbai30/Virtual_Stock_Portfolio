@@ -1,4 +1,14 @@
-# wrap core operations from the cli_src folder 
+"""
+server/logic.py
+
+Wrapper around cli_src portfolio/data helpers for use by Flask API
+
+Functions:
+- Defines storage paths and and loads state.
+- Exposes and defines logic for functions used by app.py routes
+- Persists to disk and provides reload_portfolio()/reload_watchlist() so uploads
+are reflected immediately.
+"""
 import sys
 import os
 import datetime
