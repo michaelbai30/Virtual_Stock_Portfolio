@@ -1,3 +1,19 @@
+"""
+cli_src/utils/helpers.py
+
+Small interactive wrappers around Portfolio for the command-line app.
+
+Functions:
+  - display_tickers_price(tickers): print recent price data via get_stock_data
+  - display_current_holdings(ticker, portfolio): show live price & position
+  - handle_purchase(portfolio): prompt to call portfolio.buy_stock(...)
+  - handle_sale(portfolio): prompt to call portfolio.sell_stock(...)
+  - handle_limit_order(portfolio): prompt to call queue LB/LS/SB/SL
+
+Used by:
+  - CLI entrypoints (e.g., cli_src/main.py) to drive the text UI.
+  - Not used by the Flask web app.
+"""
 from portfolio.portfolio import Portfolio
 from data.pricing import get_stock_data
 from data.pricing import get_price
