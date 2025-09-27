@@ -1,7 +1,30 @@
-# Flask Web Server
-# define the URLs the app can respond to
-# map URLs to functions defined in logic.py
-# receive data from frontend and returns json
+"""
+server/app.py — The Flask web server
+
+Defines the JSON/file APIs used by the frontend.
+
+Functions:
+- GET  / -> index.html
+- GET  /api/summary -> portfolio P/L and allocations
+- GET  /api/portfolio -> gets cash, value, holdings, transactions, limit_orders
+- GET  /api/price?symbol=... -> price JSON (helper)
+- GET  /api/price/<ticker> -> price + day % change (yfinance.info)
+- GET  /api/chart -> generate candlestick HTML
+- POST /api/buy, /api/sell -> handles market orders
+- POST /api/limit-order -> queue LB/SB/LS/SL orders
+- GET  /api/check-orders -> poll or execute pending limit/stop orders
+- POST /api/deposit, /api/withdraw
+- GET  /api/transactions.txt -> download human-readable log
+- GET  /api/portfolio.txt -> download raw JSON portfolio
+- GET  /api/watchlist.txt -> download raw watchlist
+- POST /api/portfolio/upload -> validate + replace portfolio.txt, then reload
+- POST /api/watchlist/upload -> validate + replace watchlist.txt
+- GET/POST/DELETE /api/watchlist[...] -> watchlist CRUD operations
+
+Notes:
+- Uses logic.py for all portfolio/watchlist operations and file paths.
+- After uploads, reload_portfolio() keeps state in sync with disk.
+"""
 
 import os
 import json
